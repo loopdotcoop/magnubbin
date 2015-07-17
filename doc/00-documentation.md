@@ -1,4 +1,4 @@
 Documentation
 =============
 
-- [Home](http://magnubbin.loop.coop/)
+- [Home](http://magnubbin.loop.coop/#/)
