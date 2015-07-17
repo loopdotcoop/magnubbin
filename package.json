@@ -1,0 +1,37 @@
+{
+  "name": "magnubbin",
+  "version": "0.0.1",
+  "description": "A super-rapid 3D prototyping system",
+  "main": "build/magnubbin.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "devDependencies": {
+    "apage": "latest",
+    "coffee-script": "latest",
+    "nodemon": "latest"
+  },
+  "scripts": {
+    "hi": "open .; open index.html; open test/run-test.html; subl .",
+    "make": "node bin/akaybe-build",
+    "index": "node_modules/apage/bin/apage -i README.md doc/*.md -o index.html -p \"`cat node_modules/apage/build/plugin/*.js`\"",
+    "test": "node test/run-test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loopdotcoop/magnubbin.git"
+  },
+  "keywords": [
+    "CoffeeScript",
+    "3D",
+    "Prototyping",
+    "Modelling"
+  ],
+  "author": "Rich Plastow <rich@loop.coop> (http://loop.coop/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loopdotcoop/magnubbin/issues"
+  },
+  "homepage": "http://magnubbin.loop.coop/"
+}

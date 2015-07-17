@@ -1,0 +1,373 @@
+#!/usr/bin/env node
+
+/*! akaybe-build 0.0.6 //// MIT Licence //// http://akaybe.loop.coop/ */
+
+!function (root) { 'use strict';
+
+
+    //// Define constants.
+    var C     = 'akaybe-build'
+      , V     = '0.0.6'
+
+
+    //// Load Node modules.
+      , fs    = require('fs')
+      , cp    = require('child_process') // nodejs.org/api/child_process.html
+      , exec  = cp.exec  // get one small chunk of data, less than 200k
+      , spawn = cp.spawn // get an unlimited stream of data, chunk by chunk
+
+
+    //// Declare and initialize variables.
+      , pkg   = {}
+      , argv  = process.argv.slice()
+      , doPlugin = false
+      , flag = false
+      , npms = []
+      , watch = []
+      , arg
+      , builder
+      , ndArgs
+      , nodemon
+      , stdout
+      , stderr
+      , e
+      , i
+      , l
+
+
+    //// Define regexps.
+      , doDot = new RegExp(
+            'nodemon] starting `echo "|' // normal startup
+          + 'nodemon] restarting due to changes...|' // normal restart
+          + 'nodemon] clean exit - waiting for changes' // normal restart
+        )
+
+
+    //// Usage instructions.
+      , help = [
+            C + ' ' + V
+          , '================================'.substr(0, (C + ' ' + V).length)
+          , ''
+          , 'Injects Akaybe constants and functions during compilation.'
+          , ''
+          , ''
+          , 'Basic Usage'
+          , '-----------'
+          , ''
+          , C + ' -h'
+          , C + ' --version'
+          , C + ' -p'
+          , ''
+          , ''
+          , 'Options'
+          , '-------'
+          , ''
+          , '-h --help     Show this help.'
+          , '-v --version  Show the ' + C + ' version.'
+          , "-p --plugin   Build each file in the 'plugin/' directory."
+          , "-n --npm      Run an npm task."
+          , "-w --watch    Provide additional watch directories."
+          , ''
+          , ''
+          , 'Default watch directories'
+          , '-------------------------'
+          , ''
+          , 'By default, ' + C + ' will watch for changes to:'
+          , '/src          Concatenated and compiled to /build'
+          , '/test         Concatenated with /src and compiled to /build/test'
+          , ''
+          , 'And if the --plugin or -p flag is set:'
+          , '/plugin       Compiled individually to /build/plugin'
+          , ''
+          , ''
+        ]
+
+
+    //// `normalizeArg()` deals with arguments like '--foo=bar' and '-xyz'.
+      , normalizeArg = function () {
+
+            // Remove the first argument from `argv`.
+            var a = argv.shift();
+
+            // Deal with 'foo', '--' or '-'.
+            if ('-' !== a.substr(0, 1) || '--' === a || '-' === a) { return a; }
+
+            // Deal with '--foo', '--foo=bar' or even '--foo=bar=!='.
+            if ( '--' === a.substr(0, 2) ) {
+                a = a.split('=');
+                if (1 < a.length) {
+                    argv.unshift( a.slice(1).join('=') ); // reinstate 'bar=!='
+                }
+                return a[0]; // eg '--foo'
+            }
+
+            // No need to process a single argument, eg '-w'.
+            if (2 == a.length) { return a; }
+
+            // Deal with '-xyz', which is shorthand for '-x -y -z'.
+            argv = a
+               .substr(2) // trim the leading '-x'
+               .split('') // convert 'yz' to ['y','z']
+               .map( function (c) { return '-' + c; } ) // ['-y', '-z']
+               .concat(argv) // prepend these elements onto `argv`
+            ;
+            return a.substr(0, 2); // return '-x'
+        }
+
+
+    //// `exit()` cleanly quits the CLI, eg `return exit(3, "Oops, problems!")`.
+      , exit = function (code, message, indent) {
+            message = message + ( indent ? ':\n  ' + indent : '' );
+            message += ( '\n' === message.slice(-1) ) ? '' : '\n';
+            process.stdout.write(message);
+            process.exit(code);
+        }
+
+
+    //// `packageField()` retrieves a given field from ‘package.json’.
+      , packageField = function (key) {
+            if (! pkg.json) {
+                try { pkg.json = JSON.parse( fs.readFileSync('package.json') ) }
+                catch (e) { exit(1, 'Cannot read and parse package.json', e) }
+            }
+            return pkg.json[key];
+        }
+
+
+    //// `entitle()` converts a `name` field to a `title`.
+      , entitle = function (name) {
+            var title = [];
+            name.split('-').forEach( function (word) {
+                title.push( word[0].toUpperCase() + word.substr(1) );
+            });
+            return title.join('');
+        }
+
+
+    //// `legal()` returns a single line to be added to the top of built files.
+      , legal = function () {
+            return pkg.title + ' ' + pkg.version + ' //// ' + 
+                   pkg.license + ' Licence //// ' + pkg.homepage
+            ;
+        }
+
+
+    //// `iandv()` returns a CoffeeScript line which defines `ªC` and `ªV`.
+      , iandv = function (indent) {
+            indent  = undefined === indent  ? '    ' : indent; // for litcoffee
+            return indent + "ªC = '" + pkg.title    + "'; " +
+                            "ªV = '" + pkg.version  + "';"
+            ;
+        }
+
+    ;
+
+
+    //// Populate `pkg` with useful values from ‘package.json’
+    pkg = { // note that `process.env.npm_package_*` is for `npm run ...` calls
+        name:     process.env.npm_package_name     || packageField('name')
+      , title:    process.env.npm_package_title    || packageField('title')
+      , version:  process.env.npm_package_version  || packageField('version')
+      , license:  process.env.npm_package_license  || packageField('license')
+      , homepage: process.env.npm_package_homepage || packageField('homepage')
+    }
+
+
+    //// Deal with a missing `title` field.
+    if (! pkg.title) { pkg.title = entitle(pkg.name); }
+
+
+    //// Process each argument.
+    argv.splice(0, 2); // ignore 'node' and the path to this file
+    while (argv.length) {
+        arg = normalizeArg();
+        switch (arg) {
+            case '-h':
+            case '--help':
+                return exit( 0, help.join('\n') );
+            case '-n':
+            case '--npm':
+                flag = 'npm';
+                break;
+            case '-p':
+            case '--plugin':
+                doPlugin = true;
+                break;
+            case '-v':
+            case '--version':
+                return exit(0, V);
+            case '--watch':
+                flag = 'watch';
+                break;
+            default:
+                if (2 === arg.length && '-' === arg[0]) { flag = 'unknown'; }
+                else if ('npm'   == flag) { npms.push(arg); } // an npm path
+                else if ('watch' == flag) { watch = watch.concat(['-w',arg]); }
+        }
+    }
+
+
+    //// Prepare the command which `nodemon` will run. 
+    builder =
+
+    //// Create CoffeeScript for the legal-comment and the `ªC` and `ªV` vars.
+        'echo "'  // begin a string which will be piped to `cat`
+      + '    ###' // `coffee` will convert this to '/*'
+      + '! '      // minifiers should preserve a comment starting '/*!'
+      + legal()   // add title, version, license and homepage
+      + ' ###\\n' // end the legal-comment
+      + iandv()   // inject the title and version into `ªC` and `ªV` vars
+      + ' \\n'    // newline after the `ªC` and `ªV` vars
+      + '" | '    // end the string, and pipe it to `cat`
+
+    //// Concatenate and compile the CoffeeScript, and save the JavaScript file.
+      + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+      + 'src/*.litcoffee '
+      + '| '      // pipe concatenated CoffeeScript into `coffee`
+      + 'coffee'  // the CoffeeScript compiler
+      + ' -s'     // --stdio     listen for and compile scripts over stdio
+      + ' -l'     // --literate  treat stdio as litcoffee
+       // + ' -m'     // --map       generate '.js.map' source map files @todo
+      + ' -c'     // --compile   compile to JavaScript, save as .js file
+      + ' > '     // write to file, replace if pre-existing, create if missing
+      + 'build/' + pkg.name + '.js'
+
+    //// Repeat the above, for the test-build.
+      + '; '      // separate the production-build from the test-build
+      + 'echo "'  // begin a string which will be piped to `cat`
+      + '    ###' // `coffee` will convert this to '/*'
+      + '! '      // minifiers should preserve a comment starting '/*!'
+      + legal()   // add title, version, license and homepage
+      + ' ###\\n' // end the legal-comment
+      + iandv()   // inject the title and version into `ªC` and `ªV` vars
+      + ' \\n'    // newline after the `ªC` and `ªV` vars
+      + '" | '    // end the string, and pipe it to `cat`
+      + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+      + 'src/*.litcoffee test/*.litcoffee '
+      + '| '      // pipe concatenated CoffeeScript into `coffee`
+      + 'coffee'  // the CoffeeScript compiler
+      + ' -s'     // --stdio     listen for and compile scripts over stdio
+      + ' -l'     // --literate  treat stdio as litcoffee
+      + ' -c'     // --compile   compile to JavaScript, save as .js file
+      + ' > '     // write to file, replace if pre-existing, create if missing
+      + 'build/test/' + pkg.name + '-with-test.js'
+    ;
+
+
+    //// If the `-p` flag is present, build each plugin as a separate file.
+    if (doPlugin) {
+        builder
+          +='; '      // separate the test-build from the plugin-build
+          + 'for f in ' // begin a for-loop, and declare the `$f` variable
+          + 'plugin/*.litcoffee; ' // glob all litcoffee plugin files
+          + 'do if [ -e "$f" ]; ' // skip nonexistent files goo.gl/ueO4sZ
+          + 'then '   // begin the main purpose of this loop
+
+          + 'echo "'  // begin a string xx
+          + '    ###' // `coffee` will convert this to '/*'
+          + '! '      // minifiers should preserve a comment starting '/*!'
+          + legal()   // add title, version, license and homepage
+          + '\\n $f'  // useful to preserve the plugin name
+          + ' ###\\n' // end the legal-comment
+          + '" | '    // end the string, and pipe it to `cat`
+
+          + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+          + '"$f" '
+          + '| '      // pipe concatenated CoffeeScript into `coffee`
+
+          + 'coffee'  // the CoffeeScript compiler
+          + ' -s'     // --stdio     listen for and compile scripts over stdio
+          + ' -l'     // --literate  treat stdio as litcoffee
+       // + ' -m'     // --map       generate '.js.map' source map files @todo
+          + ' -c'     // --compile   compile to JavaScript, save as .js file
+          + ' > '     // write to file, replace pre-existing, create if missing
+          + 'build/"${f%.litcoffee}.js"' // rename stackoverflow.com/a/1225236
+
+          + '; fi; '  // end the `if` block
+          + 'done'    // end the `do` block
+        ;          
+    }
+
+
+    //// Add any `npm run` tasks to the builder.
+    for (i=0, l=npms.length; i<l; i++) {
+        builder
+          +='; '      // separate the previous build from the npm-build
+          + 'npm run '
+          + npms[i]
+        ;          
+    }
+
+
+    //// Prepare arguments to send to `nodemon`. 
+    ndArgs = []
+    ndArgs = [
+        '-w','src'  // --watch  watch the ‘src/’ directory for changes
+      , '-w','test' // --watch  watch the ‘test/’ directory for changes
+    ];
+    if (doPlugin) {
+        ndArgs = ndArgs.concat([
+            '-w','plugin' // --watch  watch the ‘plugin/’ directory for changes
+        ]);
+    }
+    if (watch.length) {
+      ndArgs = ndArgs.concat(watch);
+    }
+    ndArgs = ndArgs.concat([
+        '-e'        // --ext    comma-delimited extensions to watch:
+      , 'litcoffee' //            literate CoffeeScript files
+        + ',coffee' //            standard CoffeeScript files
+        + ',md'     //            markdown files
+      , '-x'        // --exec   execute the following script
+      , builder
+    ]);
+
+
+    //// Spawn `nodemon`, which will rebuild ‘build/’ whenever a file changes.
+    nodemon = spawn('nodemon', ndArgs);
+
+
+    //// Convert standard lines of `stdout` to single '.' characters.
+    nodemon.stdout.on('data', function (data) {
+        (data+'').split('\n').forEach( function (line, i) {
+            if (! line) { return; } // skip empty lines
+            if ( doDot.test(line) ) { // too verbose for our purposes
+                if ('.' !== stdout) { process.stdout.write('\n'); }
+                stdout = '.';
+                return process.stdout.write('.');
+            } else { // might be of interest, so keep
+                if ('.' === stdout) { process.stdout.write('\n'); }
+                stdout = line;
+                process.stdout.write(line + '\n');
+            }
+        });
+    });
+
+
+    //// Display an error (avoid identical production/test build errors).
+    nodemon.stderr.on('data', function (data) {
+        data += '';
+        if (data === stderr) { return; } // don’t show an identical message
+        if ('.' === stdout) { process.stdout.write('\n'); }
+        stderr = data;
+        process.stdout.write(stderr);
+    });
+
+
+    //// Report nodemon quitting.
+    nodemon.on('close', function (code) {
+        exit(code, 'nodemon exited with code ' + code);
+    });
+
+
+    //// Revive the prompt properly after ctrl-c.
+    process.on('SIGINT', function () {
+        exit(0, '\n...' + C + ' ' + V + ' done.');
+    });
+
+
+    //// Startup message.
+    process.stdout.write(C + ' ' + V + ' begun...\n');
+
+
+}(this);
