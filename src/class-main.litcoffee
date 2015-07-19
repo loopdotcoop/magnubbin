@@ -20,10 +20,10 @@ Properties
 ----------
 
 
-#### `xx <xx>`
-Xx. @todo describe
+#### `ookonsole <Ookonsole>`
+The command-line functionality is instantiated after the HTML is injected. 
 
-        @xx = null
+        @ookonsole = null
 
 
 
@@ -31,13 +31,22 @@ Xx. @todo describe
 Init
 ----
 
-If `config.$cssTarget` was passed a `<STYLE>` element, append Magnubbin’s CSS. 
+If `config.$cssTarget` was passed a `<STYLE>` element, inject Magnubbin’s CSS. 
 
-        if @$cssTarget then appendCSS @$cssTarget, "Appended by #{ªC} #{ªV}"
+        if @$cssTarget then injectCSS @$cssTarget, "Injected by #{ªC} #{ªV}"
 
-If `config.$htmlTarget` was passed an element, append Magnubbin’s HTML. 
+If `config.$htmlTarget` was passed an element, inject Magnubbin’s HTML. 
 
-        if @$htmlTarget then appendHTML @$htmlTarget, "Appended by #{ªC} #{ªV}"
+        if @$htmlTarget then injectHTML @$htmlTarget, "Injected by #{ªC} #{ªV}"
+
+
+Instantiate, configure and start the command-line functionality. 
+
+        @ookonsole = new Ookonsole
+          $display: $ '#ookonsole-display'
+          $command: $ '#ookonsole-command'
+        @ookonsole.show()
+        @ookonsole.start()
 
 
 
@@ -60,23 +69,13 @@ Functions
 ---------
 
 
-#### `zz()`
-- `xx <xx>`  Xx 
+#### `injectCSS()`
+- `$cssTarget <HTMLStyleElement>`  A `<STYLE>` element to inject the CSS into
+- `$title <string>`                Text to add at the top of the injected CSS
 
 Xx. @todo describe
 
-    zz = (xx) ->
-
-
-
-
-#### `appendCSS()`
-- `$cssTarget <HTMLStyleElement>`  A `<STYLE>` element to append the CSS into
-- `$title <string>`                Text to add at the top of the appended CSS
-
-Xx. @todo describe
-
-    appendCSS = ($cssTarget, title) ->
+    injectCSS = ($cssTarget, title) ->
       $cssTarget.innerHTML = """
         /* `@import` must go first */
         @import url(http://fonts.googleapis.com/css?family=Podkova);
@@ -107,6 +106,7 @@ Xx. @todo describe
           right:  0;
           width:  25%;
           height: 100%;
+          min-width: 35rem; /* usual maximum ookonsole-display lines */
           background: rgba(30,30,30,0.7);
         }
         .magnubbin-control >* {
@@ -194,25 +194,22 @@ Xx. @todo describe
         }
 
 
-        /* LOG */
-        .magnubbin-log {
-          padding: 0.5em 0.8em;
+        /* DISPLAY AND COMMAND */
+        .magnubbin-control >* #ookonsole-display {
+          height: auto; /* override 1px */
+          padding: 0.75em 0.8em;
           border: 2px solid;
           border-radius: 0.4em 0.4em 0 0;
+          font: 0.75rem "monaco", monospace;
         }
-        .magnubbin-control >* .magnubbin-log {
-          height: auto; /* override 1px */
-        }
-
-        /* INPUT */
-        .magnubbin-input {
+        #ookonsole-command {
           display: block;
           box-sizing: border-box;
           padding: 0.5em;
           width: 100%;
           border: 2px solid #acb;
           border-radius: 0 0 0.4em 0.4em;
-          font: 1.5em monospace;
+          font: 1em "monaco", monospace;
           color: #eee;
           background: transparent;
         }
@@ -222,19 +219,19 @@ Xx. @todo describe
 
 
 
-#### `appendHTML()`
-- `$htmlTarget <HTMLStyleElement>`  An element to append the HTML into
-- `$title <string>`                 Text to add at the top of the appended HTML
+#### `injectHTML()`
+- `$htmlTarget <HTMLStyleElement>`  An element to inject the HTML into
+- `$title <string>`                 Text to add at the top of the injected HTML
 
 Xx. @todo describe
 
-    appendHTML = ($htmlTarget, title) ->
+    injectHTML = ($htmlTarget, title) ->
 
 Mark the `$htmlTarget` as a wrapper for the Magnubbin HTML elements. 
 
       $htmlTarget.className += ' magnubbin-wrap'
 
-Append the HTML elements for the basic Magnubbin framework. 
+Inject HTML elements for the basic Magnubbin framework. 
 
       $htmlTarget.innerHTML = """\n\n
         <!-- #{title} -->
@@ -265,10 +262,10 @@ Append the HTML elements for the basic Magnubbin framework.
               <h4>Command Line:</h4>
             </div>
             <div>
-              <pre class="magnubbin-log ookonsole-log"></pre>
+              <pre id="ookonsole-display"></pre>
             </div>
             <div>
-              <div><input class="magnubbin-input ookonsole-command"></div>
+              <div><input id="ookonsole-command"></div>
             </div>
           </section>
           <section class="magnubbin-preexisting">

@@ -24,7 +24,16 @@ make the source code less verbose: `ªO == typeof x` vs `'object' == typeof x`.
     ªR = 'regexp'
     ªS = 'string'
     ªU = 'undefined'
-    ªX = 'null'
+
+
+
+
+Constants for scope and environment
+-----------------------------------
+
+`ªX` is root scope, `window` in a browser. 
+
+    ªX = @
 
 
 
