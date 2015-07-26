@@ -32,6 +32,12 @@ The 3D functionality is instantiated after the HTML is injected.
         @oo3d = null
 
 
+#### `oo3d <HTMLCollection|null>`
+@todo describe. 
+
+        @$$presets = null
+
+
 #### `focus <integer|undefined>`
 Index of the buffer which has focus. The camera has focus if `undefined`. 
 
@@ -51,6 +57,12 @@ If `config.$htmlTarget` was passed an element, inject Magnubbin’s HTML.
 
         if @$htmlTarget then injectHTML @$htmlTarget, "Injected by #{ªC} #{ªV}"
 
+Enable preset buttons. 
+
+        @$$presets = $$ '.magnubbin-presets >li'
+        for $preset in @$$presets
+          $preset.addEventListener 'click', (event) =>
+            @ookonsole.execute event.target.getAttribute 'data-command'
 
         try
 
@@ -476,9 +488,27 @@ Inject HTML elements for the basic Magnubbin framework.
             </div>
             <div>
               <ul class="magnubbin-presets">
-                <li>Add Slyce</li>
-                <li>Add Betr</li>
-                <li>Select Camera</li>
+                <li data-command="clear">Clear</li>
+                <li data-command="add slyce">Add Slyce</li>
+                <li data-command="add betr">Add Betr</li>
+                <li data-command="move x -0.2">x-</li>
+                <li data-command="move x 0.2" >x+</li>
+                <li data-command="move y -0.2">y-</li>
+                <li data-command="move y 0.2" >y+</li>
+                <li data-command="move z -0.2">z-</li>
+                <li data-command="move z 0.2" >z+</li>
+                <li data-command="rotate x -20">rx-</li>
+                <li data-command="rotate x 20" >rx+</li>
+                <li data-command="rotate y -20">ry-</li>
+                <li data-command="rotate y 20" >ry+</li>
+                <li data-command="rotate z -20">rz-</li>
+                <li data-command="rotate z 20" >rz+</li>
+                <li data-command="blur">Focus Camera</li>
+                <li data-command="focus 0">0</li>
+                <li data-command="focus 1">1</li>
+                <li data-command="focus 2">2</li>
+                <li data-command="focus 3">3</li>
+                <li data-command="focus 4">4</li>
               </ul>
             </div>
             <div>
