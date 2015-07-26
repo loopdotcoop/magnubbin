@@ -20,10 +20,22 @@ Properties
 ----------
 
 
-#### `ookonsole <Ookonsole>`
+#### `ookonsole <Ookonsole|null>`
 The command-line functionality is instantiated after the HTML is injected. 
 
         @ookonsole = null
+
+
+#### `oo3d <Oo3d|null>`
+The 3D functionality is instantiated after the HTML is injected. 
+
+        @oo3d = null
+
+
+#### `focus <integer|undefined>`
+Index of the buffer which has focus. The camera has focus if `undefined`. 
+
+        @focus = undefined
 
 
 
@@ -40,13 +52,191 @@ If `config.$htmlTarget` was passed an element, inject Magnubbin’s HTML.
         if @$htmlTarget then injectHTML @$htmlTarget, "Injected by #{ªC} #{ªV}"
 
 
+        try
+
 Instantiate, configure and start the command-line functionality. 
 
-        @ookonsole = new Ookonsole
-          $display: $ '#ookonsole-display'
-          $command: $ '#ookonsole-command'
-        @ookonsole.show()
-        @ookonsole.start()
+          @ookonsole = new Ookonsole
+            $display: $ '#ookonsole-display'
+            $command: $ '#ookonsole-command'
+            context: @ # tasks act on this `main` instance
+          @initTasks()
+          @ookonsole.show()
+          @ookonsole.start()
+
+
+Instantiate, configure and render the 3D functionality. 
+
+          @oo3d = new Oo3d
+            $main: $ '#oo3d-main'
+          @oo3d.render()
+
+Deal with init errors. 
+
+        catch error
+          $('#magnubbin-error').innerHTML = error
+          $('#magnubbin-error').className = '' # remove '.hidden'
+
+
+
+      initTasks: ->
+
+Add the `add` task. 
+
+        @ookonsole.addTask 'add',
+          summary: "Add a new magnubbin to the scene"
+          completions: ['add slyce','add betr'] #@todo more of these
+          details: """
+    add
+    ---
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            oo3d = context.oo3d
+            switch options[0]
+              when 'slyce'
+                index = oo3d.addBuffer
+                  positions: [
+                     0.0,  0.3,  1.0,
+                    -0.4, -0.5,  1.0,
+                     0.8, -0.3,  1.0
+                  ]
+                  colors: [
+                     1.0,  0.0,  0.0,  1.0, # red
+                     0.0,  1.0,  0.0,  1.0, # green
+                     0.0,  0.0,  1.0,  1.0  # blue
+                  ]
+                context.focus = index
+                oo3d.render() #@todo remove when animation loop is done
+                "Added slyce. Focused on index #{index}"
+              when 'betr'
+                index = oo3d.addBuffer
+                  positions: [
+                     1.0,  0.3, -1.0,
+                    -0.4, -0.5,  0.0,
+                     0.8,  0.3, -1.0
+                  ]
+                  colors: [
+                     1.0,  0.0,  0.0,  1.0, # red
+                     0.0,  1.0,  0.0,  1.0, # green
+                     0.0,  0.0,  1.0,  1.0  # blue
+                  ]
+                context.focus = index
+                oo3d.render() #@todo remove when animation loop is done
+                "Added betr. Focused on index #{index}"
+              else
+                "'#{options[0]}' not recognised"
+
+Add the `focus` task. 
+
+        @ookonsole.addTask 'focus',
+          summary: "Focus on one of the magnubbins"
+          completions: ['focus '] #@todo needed?
+          details: """
+    focus
+    -----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            index = options[0]
+            if ! /^\d+$/.test index
+              "'#{index}' is not a valid index - must be an integer"
+            else if ! (target = context.oo3d.buffers[+index])
+              "Index '#{index}' does not exist"
+            else
+              context.focus = +index
+              "Focused on index '#{index}'"
+
+Add the `blur` task. 
+
+        @ookonsole.addTask 'blur',
+          summary: "Focus on the camera"
+          completions: ['blur'] #@todo needed?
+          details: """
+    blur
+    -----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            context.focus = undefined
+            "Focused on the camera"
+
+Add the `move` task. 
+
+        @ookonsole.addTask 'move',
+          summary: "Move the Focused magnubbin"
+          completions: ['move ','move x ','move y ','move z ']
+          details: """
+    move
+    ----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            axis     = options[0]
+            distance = options[1]
+            if ! /^[xyz]$/.test axis
+              "Axis #{axis} is not valid - use x, y, or z"
+            else if ! /^-?\d+(.\d+)?$/.test distance #@todo make numeric
+              "Distance #{distance} is not valid - must be numeric"
+            else
+              config =
+                target: context.focus
+                type:   'translate'
+              config[axis] = +distance
+
+              context.oo3d.transform config
+              context.oo3d.render() #@todo remove when animation loop is done
+
+              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Moved index '#{context.focus}'"
+              else
+                "Moved the camera"
+
+Add the `rotate` task. 
+
+        @ookonsole.addTask 'rotate',
+          summary: "Move the Focused magnubbin"
+          completions: ['rotate ','rotate x ','rotate y ','rotate z ']
+          details: """
+    rotate
+    ----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            axis    = options[0]
+            degrees = options[1]
+            if ! /^[xyz]$/.test axis
+              "Axis #{axis} is not valid - use x, y, or z"
+            else if ! /^-?\d+(.\d+)?$/.test degrees #@todo make numeric
+              "Degrees #{degrees} is not valid - must be numeric"
+            else
+              config =
+                target: context.focus
+                type:   'rotate' + axis.toUpperCase()
+                rad:    degrees * Math.PI / 180
+
+              context.oo3d.transform config
+              context.oo3d.render() #@todo remove when animation loop is done
+
+              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Rotated index '#{context.focus}' #{degrees}º on axis #{axis}"
+              else
+                "Rotated the camera #{degrees}º on axis #{axis}"
 
 
 
@@ -133,6 +323,17 @@ Xx. @todo describe
         }
 
 
+        /* 3D CONTEXT */
+        #oo3d-main {
+          position: absolute;
+          top:     0;
+          left:    0;
+          width:   100%;
+          height:  100%;
+          z-index: -1;
+        }
+
+
         /* INFO PANEL */
         .magnubbin-preexisting {
           left:   -76%;
@@ -214,6 +415,26 @@ Xx. @todo describe
           background: transparent;
         }
 
+
+        /* ERROR */
+        #magnubbin-error {
+          position: absolute;
+          box-sizing: border-box;
+          bottom:  0;
+          left:    5%;
+          width:  90%;
+          padding: 1rem;
+          font-family: monaco, monospace;
+          background-color: #933;
+          color: #fff;
+          transition: all 0.5s;
+          opacity: 1;
+        }
+        #magnubbin-error.hidden {
+          padding-bottom: 0;
+          opacity: 0;
+        }
+
       """
 
 
@@ -239,7 +460,9 @@ Inject HTML elements for the basic Magnubbin framework.
         <!-- The main Magnubbin elements -->
         <main class="magnubbin-main">
           <section class="magnubbin-view">
+            <canvas id="oo3d-main" width="600" height="450"></canvas><!-- @todo resize with window -->
             <a href="http://loop.coop/" title="Created by Loop.Coop" class="magnubbin-logo">Loop.Coop</a>
+            <div id="magnubbin-error" class="hidden"></div>
           </section>
           <section class="magnubbin-control">
             <div>
@@ -253,9 +476,9 @@ Inject HTML elements for the basic Magnubbin framework.
             </div>
             <div>
               <ul class="magnubbin-presets">
-                <li>Preset 1</li>
-                <li>Preset 2</li>
-                <li>Preset 3</li>
+                <li>Add Slyce</li>
+                <li>Add Betr</li>
+                <li>Select Camera</li>
               </ul>
             </div>
             <div>

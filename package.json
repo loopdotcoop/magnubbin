@@ -1,6 +1,6 @@
 {
   "name": "magnubbin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A super-rapid 3D prototyping system",
   "main": "build/magnubbin.js",
   "directories": {
@@ -14,12 +14,13 @@
     "nodemon": "latest"
   },
   "dependencies": {
-    "ookonsole": "latest"
+    "ookonsole": "latest",
+    "oo3d": "latest"
   },
   "scripts": {
     "hi": "open .; open index.html; open test/run-test.html; subl .",
     "make": "node bin/akaybe-build --plugin --npm index",
-    "index": "node_modules/apage/bin/apage -i README.md doc/*.md -o index.html -p \"`cat node_modules/apage/build/plugin/*.js node_modules/ookonsole/build/ookonsole.js build/magnubbin.js`\"",
+    "index": "node_modules/apage/bin/apage -i README.md doc/*.md -o index.html -p \"`cat node_modules/apage/build/plugin/*.js node_modules/ookonsole/build/ookonsole.js node_modules/oo3d/build/oo3d.js build/magnubbin.js`\"",
     "test": "node test/run-test.js"
   },
   "repository": {
