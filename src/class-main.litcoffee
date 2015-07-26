@@ -304,7 +304,9 @@ Xx. @todo describe
           background: rgba(30,50,40,0.7);
         }
         .magnubbin-control {
-          display: table;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
           right:  0;
           width:  25%;
           height: 100%;
@@ -312,13 +314,10 @@ Xx. @todo describe
           background: rgba(30,30,30,0.7);
         }
         .magnubbin-control >* {
-          display: table-row;
+          flex-basis: 0%; /* log is '100%', so expands to fill */
         }
-        .magnubbin-control >* >* {
-          display: table-cell;
-          height: 1px; /* log is 'auto', so expands to fill */
-        }
-        .magnubbin-control h4 {
+        .magnubbin-control h4 { /* @todo remove if not used */
+          margin: 0;
           padding: 0.3em 0;
         }
         .magnubbin-control ul,
@@ -363,18 +362,15 @@ Xx. @todo describe
         .magnubbin-toggle-preexisting {
           height: 3em;
         }
-        .magnubbin-logo {
-          float: left;
-          font: bold 1.5em Podkova;
-        }
         .magnubbin-icon-info {
           display: block;
-          float: right;
+          float: left;
+          margin: -0.2em 0 0.2em 0;
+          padding: 0;
           width:      1em;
           height:     1em;
           max-width:  1em;
           max-height: 1em;
-          padding: 0;
           border: 2px solid; /* same as text color */
           border-radius: 2em;
           font: bold italic 2em serif;
@@ -383,6 +379,12 @@ Xx. @todo describe
           content: "i";
           display: inline-block;
           margin-left: 0.35em;
+        }
+        .magnubbin-logo {
+          font: bold 1.5em Podkova;
+        }
+        .magnubbin-control .magnubbin-logo {
+          float: right;
         }
 
 
@@ -408,8 +410,9 @@ Xx. @todo describe
 
 
         /* DISPLAY AND COMMAND */
-        .magnubbin-control >* #ookonsole-display {
-          height: auto; /* override 1px */
+        .magnubbin-control #ookonsole-display {
+          flex-basis: 100%; /* override 1px */
+          margin: 0;
           padding: 0.75em 0.8em;
           border: 2px solid;
           border-radius: 0.4em 0.4em 0 0;
@@ -477,49 +480,35 @@ Inject HTML elements for the basic Magnubbin framework.
             <div id="magnubbin-error" class="hidden"></div>
           </section>
           <section class="magnubbin-control">
-            <div>
-              <a href="#/" title="Toggle info" class="magnubbin-toggle-preexisting">
-                <span class="magnubbin-logo">Magnubbin</span>
-                <span class="magnubbin-icon-info"></span>
-              </a>
-            </div>
-            <div>
-              <h4>Presets:</h4>
-            </div>
-            <div>
-              <ul class="magnubbin-presets">
-                <li data-command="clear">Clear</li>
-                <li data-command="add slyce">Add Slyce</li>
-                <li data-command="add betr">Add Betr</li>
-                <li data-command="move x -0.2">x-</li>
-                <li data-command="move x 0.2" >x+</li>
-                <li data-command="move y -0.2">y-</li>
-                <li data-command="move y 0.2" >y+</li>
-                <li data-command="move z -0.2">z-</li>
-                <li data-command="move z 0.2" >z+</li>
-                <li data-command="rotate x -20">rx-</li>
-                <li data-command="rotate x 20" >rx+</li>
-                <li data-command="rotate y -20">ry-</li>
-                <li data-command="rotate y 20" >ry+</li>
-                <li data-command="rotate z -20">rz-</li>
-                <li data-command="rotate z 20" >rz+</li>
-                <li data-command="blur">Focus Camera</li>
-                <li data-command="focus 0">0</li>
-                <li data-command="focus 1">1</li>
-                <li data-command="focus 2">2</li>
-                <li data-command="focus 3">3</li>
-                <li data-command="focus 4">4</li>
-              </ul>
-            </div>
-            <div>
-              <h4>Command Line:</h4>
-            </div>
-            <div>
-              <pre id="ookonsole-display"></pre>
-            </div>
-            <div>
-              <div><input id="ookonsole-command"></div>
-            </div>
+            <a href="#/" title="Toggle info" class="magnubbin-toggle-preexisting">
+              <span class="magnubbin-icon-info"></span>
+              <span class="magnubbin-logo">Magnubbin</span>
+            </a>
+            <ul class="magnubbin-presets">
+              <li data-command="clear">Clear</li>
+              <li data-command="add slyce">Add Slyce</li>
+              <li data-command="add betr">Add Betr</li>
+              <li data-command="move x -0.2">x-</li>
+              <li data-command="move x 0.2" >x+</li>
+              <li data-command="move y -0.2">y-</li>
+              <li data-command="move y 0.2" >y+</li>
+              <li data-command="move z -0.2">z-</li>
+              <li data-command="move z 0.2" >z+</li>
+              <li data-command="rotate x -20">rx-</li>
+              <li data-command="rotate x 20" >rx+</li>
+              <li data-command="rotate y -20">ry-</li>
+              <li data-command="rotate y 20" >ry+</li>
+              <li data-command="rotate z -20">rz-</li>
+              <li data-command="rotate z 20" >rz+</li>
+              <li data-command="blur">Focus Camera</li>
+              <li data-command="focus 0">0</li>
+              <li data-command="focus 1">1</li>
+              <li data-command="focus 2">2</li>
+              <li data-command="focus 3">3</li>
+              <li data-command="focus 4">4</li>
+            </ul>
+            <pre id="ookonsole-display"></pre>
+            <div><input id="ookonsole-command"></div>
           </section>
           <section class="magnubbin-preexisting">
             #{$htmlTarget.innerHTML}
