@@ -97,7 +97,7 @@ Add the `add` task.
 
         @ookonsole.addTask 'add',
           summary: "Add a new magnubbin to the scene"
-          completions: ['add slyce','add betr'] #@todo more of these
+          completions: ['add ocrex','add slyce','add betr'] #@todo more of these
           details: """
     add
     ---
@@ -109,6 +109,47 @@ Add the `add` task.
           runner: (context, options) ->
             oo3d = context.oo3d
             switch options[0]
+              when 'ocrex'
+                index = oo3d.addBuffer
+                  positions: [
+                    # 4:5:5 triangle
+                    -2.0,  0.3,    -1.84,
+                     2.0,  0.3,    -1.84,
+                     0.0,  0.0,     2.742566667,
+                    # first 3:4:5 triangle
+                     0.0,  0.0,     2.742566667,
+                     0.0,  2.2678,  0.77866667,
+                    -2.0,  0.3,    -1.84,
+                    # 4:4:4 triangle
+                    -2.0,  0.3,    -1.84,
+                     0.0,  2.2678,  0.77866667,
+                     2.0,  0.3,    -1.84,
+                    # second 3:4:5 triangle
+                     2.0,  0.3,    -1.84,
+                     0.0,  2.2678,  0.77866667,
+                     0.0,  0.0,     2.742566667,
+                  ]
+                  colors: [
+                    # 4:5:5 triangle
+                     1.0,  0.0,  0.0,  1.0, # red
+                     1.0,  0.0,  1.0,  1.0, # magenta
+                     1.0,  0.0,  0.5,  1.0  # red/mag
+                    # first 3:4:5 triangle
+                     1.0,  0.0,  0.0,  1.0, # red
+                     1.0,  0.0,  1.0,  1.0, # magenta
+                     1.0,  0.0,  0.5,  1.0  # red/mag
+                    # 4:4:4 triangle
+                     1.0,  0.0,  0.0,  1.0, # red
+                     1.0,  0.0,  1.0,  1.0, # magenta
+                     1.0,  0.0,  0.5,  1.0  # red/mag
+                    # second 3:4:5 triangle
+                     1.0,  0.0,  0.0,  1.0, # red
+                     1.0,  0.0,  1.0,  1.0, # magenta
+                     1.0,  0.0,  0.5,  1.0  # red/mag
+                  ]
+                context.focus = index
+                oo3d.render() #@todo remove when animation loop is done
+                "Added slyce. Focused on index #{index}"
               when 'slyce'
                 index = oo3d.addBuffer
                   positions: [
@@ -360,7 +401,9 @@ Xx. @todo describe
 
         /* TOGGLE */
         .magnubbin-toggle-preexisting {
+          display: block;
           height: 3em;
+          margin: 0 0 0.3em 0;
         }
         .magnubbin-icon-info {
           display: block;
@@ -389,8 +432,9 @@ Xx. @todo describe
 
 
         /* PRESETS */
-        .magnubbin-presets {
+        ul.magnubbin-presets {
           clear: both;
+          margin: 0 0 0.2em 0;
           padding: 0;
         }
         .magnubbin-presets >li {
@@ -486,20 +530,27 @@ Inject HTML elements for the basic Magnubbin framework.
             </a>
             <ul class="magnubbin-presets">
               <li data-command="clear">Clear</li>
+              <li data-command="add ocrex">Add Ocrex</li>
               <li data-command="add slyce">Add Slyce</li>
               <li data-command="add betr">Add Betr</li>
+            </ul>
+            <ul class="magnubbin-presets">
               <li data-command="move x -0.2">x-</li>
               <li data-command="move x 0.2" >x+</li>
               <li data-command="move y -0.2">y-</li>
               <li data-command="move y 0.2" >y+</li>
               <li data-command="move z -0.2">z-</li>
               <li data-command="move z 0.2" >z+</li>
+            </ul>
+            <ul class="magnubbin-presets">
               <li data-command="rotate x -20">rx-</li>
               <li data-command="rotate x 20" >rx+</li>
               <li data-command="rotate y -20">ry-</li>
               <li data-command="rotate y 20" >ry+</li>
               <li data-command="rotate z -20">rz-</li>
               <li data-command="rotate z 20" >rz+</li>
+            </ul>
+            <ul class="magnubbin-presets">
               <li data-command="blur">Focus Camera</li>
               <li data-command="focus 0">0</li>
               <li data-command="focus 1">1</li>
