@@ -38,10 +38,10 @@ The 3D functionality is instantiated after the HTML is injected.
         @$$presets = null
 
 
-#### `focus <integer|undefined>`
-Index of the buffer which has focus. The camera has focus if `undefined`. 
+#### `focusIndex <integer|undefined>`
+Index of the shape which has focus. The camera has focus if `undefined`. 
 
-        @focus = undefined
+        @focusIndex = undefined
 
 
 
@@ -147,7 +147,7 @@ Add the `add` task.
                      1.0,  0.0,  1.0,  1.0, # magenta
                      1.0,  0.0,  0.5,  1.0  # red/mag
                   ]
-                context.focus = index
+                context.changeFocus index
                 oo3d.render() #@todo remove when animation loop is done
                 "Added slyce. Focused on index #{index}"
               when 'slyce'
@@ -162,7 +162,7 @@ Add the `add` task.
                      0.0,  1.0,  0.0,  1.0, # green
                      0.0,  0.0,  1.0,  1.0  # blue
                   ]
-                context.focus = index
+                context.changeFocus index
                 oo3d.render() #@todo remove when animation loop is done
                 "Added slyce. Focused on index #{index}"
               when 'betr'
@@ -177,7 +177,7 @@ Add the `add` task.
                      0.0,  1.0,  0.0,  1.0, # green
                      0.0,  0.0,  1.0,  1.0  # blue
                   ]
-                context.focus = index
+                context.changeFocus index
                 oo3d.render() #@todo remove when animation loop is done
                 "Added betr. Focused on index #{index}"
               else
@@ -206,7 +206,8 @@ Add the `focus` task.
             else if ! (target = context.oo3d.buffers[+index])
               "Index '#{index}' does not exist"
             else
-              context.focus = +index
+              context.changeFocus +index
+              context.oo3d.render() #@todo remove when animation loop is done
               "Focused on index '#{index}'"
 
 Add the `blur` task. 
@@ -223,7 +224,8 @@ Add the `blur` task.
 
     """
           runner: (context, options) ->
-            context.focus = undefined
+            context.changeFocus undefined
+            context.oo3d.render() #@todo remove when animation loop is done
             "Focused on the camera"
 
 
@@ -251,16 +253,16 @@ Add the `move` task.
               "Distance #{distance} is not valid - must be numeric"
             else
               if 'x' == axis
-                context.oo3d.translate +distance, 0, 0, context.focus
+                context.oo3d.translate +distance, 0, 0, context.focusIndex
               if 'y' == axis
-                context.oo3d.translate 0, +distance, 0, context.focus
+                context.oo3d.translate 0, +distance, 0, context.focusIndex
               if 'z' == axis
-                context.oo3d.translate 0, 0, +distance, context.focus
+                context.oo3d.translate 0, 0, +distance, context.focusIndex
 
               context.oo3d.render() #@todo remove when animation loop is done
 
-              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Moved index '#{context.focus}'"
+              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Moved index '#{context.focusIndex}'"
               else
                 "Moved the camera"
 
@@ -285,11 +287,11 @@ Add the `scale` task.
             if ! /^-?\d+(.\d+)?$/.test factor #@todo make numeric
               "Factor #{factor} is not valid - must be numeric"
             else
-              context.oo3d.scale +factor, +factor, +factor, context.focus
+              context.oo3d.scale +factor, +factor, +factor, context.focusIndex
               context.oo3d.render() #@todo remove when animation loop is done
 
-              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Scaled index '#{context.focus}'"
+              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Scaled index '#{context.focusIndex}'"
               else
                 "Scaled the camera"
 
@@ -315,16 +317,16 @@ Add the `flip` task.
               "Axis #{axis} is not valid - use x, y, or z"
             else
               if 'x' == axis
-                context.oo3d.scale -1, 1, 1, context.focus
+                context.oo3d.scale -1, 1, 1, context.focusIndex
               if 'y' == axis
-                context.oo3d.scale 1, -1, 1, context.focus
+                context.oo3d.scale 1, -1, 1, context.focusIndex
               if 'z' == axis
-                context.oo3d.scale 1, 1, -1, context.focus
+                context.oo3d.scale 1, 1, -1, context.focusIndex
 
               context.oo3d.render() #@todo remove when animation loop is done
 
-              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Flipped index '#{context.focus}'"
+              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Flipped index '#{context.focusIndex}'"
               else
                 "Flipped the camera"
 
@@ -354,16 +356,16 @@ Add the `rotate` task.
             else
               rads = degrees * Math.PI / 180
               if 'x' == axis
-                context.oo3d.rotate rads, 0, 0, context.focus
+                context.oo3d.rotate rads, 0, 0, context.focusIndex
               if 'y' == axis
-                context.oo3d.rotate 0, rads, 0, context.focus
+                context.oo3d.rotate 0, rads, 0, context.focusIndex
               if 'z' == axis
-                context.oo3d.rotate 0, 0, rads, context.focus
+                context.oo3d.rotate 0, 0, rads, context.focusIndex
 
               context.oo3d.render() #@todo remove when animation loop is done
 
-              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Rotated index '#{context.focus}' #{degrees}º on axis #{axis}"
+              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Rotated '#{context.focusIndex}' #{degrees}º on axis #{axis}"
               else
                 "Rotated the camera #{degrees}º on axis #{axis}"
 
@@ -374,12 +376,26 @@ Methods
 -------
 
 
-#### `yy()`
-- `xx <xx>`  Xx 
+#### `changeFocus()`
+- `focusIndex <integer>`  Index of the shape to focus on 
 
 Xx. @todo describe
 
-      yy: (xx) ->
+      changeFocus: (focusIndex) ->
+
+Update the `focusIndex` property. 
+
+        @focusIndex = focusIndex
+
+Set all shapes’ render modes to solid-color. @todo quicker than this?
+
+        @oo3d.setRenderMode('TRIANGLES', i) for i in [0..@oo3d.buffers.length-1]
+
+Set the newly focused shape’s render mode to wireframe. 
+
+        if ªN == typeof focusIndex
+          @oo3d.setRenderMode 'LINE_LOOP', focusIndex
+
 
 
 
@@ -611,20 +627,27 @@ Inject HTML elements for the basic Magnubbin framework.
               <li data-command="add betr">Add Betr</li>
             </ul>
             <ul class="magnubbin-presets">
-              <li data-command="move x -0.2">x-</li>
-              <li data-command="move x 0.2" >x+</li>
-              <li data-command="move y -0.2">y-</li>
-              <li data-command="move y 0.2" >y+</li>
-              <li data-command="move z -0.2">z-</li>
-              <li data-command="move z 0.2" >z+</li>
-            </ul>
-            <ul class="magnubbin-presets">
               <li data-command="rotate x -20">rx-</li>
               <li data-command="rotate x 20" >rx+</li>
               <li data-command="rotate y -20">ry-</li>
               <li data-command="rotate y 20" >ry+</li>
               <li data-command="rotate z -20">rz-</li>
               <li data-command="rotate z 20" >rz+</li>
+            </ul>
+            <ul class="magnubbin-presets">
+              <li data-command="scale 2.0">&times;2</li>
+              <li data-command="scale 0.5" >&divide2</li>
+              <li data-command="flip x">fx</li>
+              <li data-command="flip y">fy</li>
+              <li data-command="flip z">fz</li>
+            </ul>
+            <ul class="magnubbin-presets">
+              <li data-command="move x -0.2">x-</li>
+              <li data-command="move x 0.2" >x+</li>
+              <li data-command="move y -0.2">y-</li>
+              <li data-command="move y 0.2" >y+</li>
+              <li data-command="move z -0.2">z-</li>
+              <li data-command="move z 0.2" >z+</li>
             </ul>
             <ul class="magnubbin-presets">
               <li data-command="blur">Focus Camera</li>
