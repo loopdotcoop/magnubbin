@@ -183,6 +183,9 @@ Add the `add` task.
               else
                 "'#{options[0]}' not recognised"
 
+
+
+
 Add the `focus` task. 
 
         @ookonsole.addTask 'focus',
@@ -223,6 +226,9 @@ Add the `blur` task.
             context.focus = undefined
             "Focused on the camera"
 
+
+
+
 Add the `move` task. 
 
         @ookonsole.addTask 'move',
@@ -244,12 +250,13 @@ Add the `move` task.
             else if ! /^-?\d+(.\d+)?$/.test distance #@todo make numeric
               "Distance #{distance} is not valid - must be numeric"
             else
-              config =
-                target: context.focus
-                type:   'translate'
-              config[axis] = +distance
+              if 'x' == axis
+                context.oo3d.translate +distance, 0, 0, context.focus
+              if 'y' == axis
+                context.oo3d.translate 0, +distance, 0, context.focus
+              if 'z' == axis
+                context.oo3d.translate 0, 0, +distance, context.focus
 
-              context.oo3d.transform config
               context.oo3d.render() #@todo remove when animation loop is done
 
               if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
@@ -257,10 +264,77 @@ Add the `move` task.
               else
                 "Moved the camera"
 
+
+
+
+Add the `scale` task. 
+
+        @ookonsole.addTask 'scale',
+          summary: "Scale the Focused magnubbin"
+          completions: ['scale ','scale 2.0','scale 0.5']
+          details: """
+    scale
+    ----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            factor = options[0]
+            if ! /^-?\d+(.\d+)?$/.test factor #@todo make numeric
+              "Factor #{factor} is not valid - must be numeric"
+            else
+              context.oo3d.scale +factor, +factor, +factor, context.focus
+              context.oo3d.render() #@todo remove when animation loop is done
+
+              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Scaled index '#{context.focus}'"
+              else
+                "Scaled the camera"
+
+
+
+
+Add the `flip` task. 
+
+        @ookonsole.addTask 'flip',
+          summary: "Flip the Focused magnubbin"
+          completions: ['flip ','flip 2.0','flip 0.5']
+          details: """
+    flip
+    ----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+            axis = options[0]
+            if ! /^[xyz]$/.test axis
+              "Axis #{axis} is not valid - use x, y, or z"
+            else
+              if 'x' == axis
+                context.oo3d.scale -1, 1, 1, context.focus
+              if 'y' == axis
+                context.oo3d.scale 1, -1, 1, context.focus
+              if 'z' == axis
+                context.oo3d.scale 1, 1, -1, context.focus
+
+              context.oo3d.render() #@todo remove when animation loop is done
+
+              if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+                "Flipped index '#{context.focus}'"
+              else
+                "Flipped the camera"
+
+
+
+
 Add the `rotate` task. 
 
         @ookonsole.addTask 'rotate',
-          summary: "Move the Focused magnubbin"
+          summary: "Rotate the Focused magnubbin"
           completions: ['rotate ','rotate x ','rotate y ','rotate z ']
           details: """
     rotate
@@ -278,12 +352,14 @@ Add the `rotate` task.
             else if ! /^-?\d+(.\d+)?$/.test degrees #@todo make numeric
               "Degrees #{degrees} is not valid - must be numeric"
             else
-              config =
-                target: context.focus
-                type:   'rotate' + axis.toUpperCase()
-                rad:    degrees * Math.PI / 180
+              rads = degrees * Math.PI / 180
+              if 'x' == axis
+                context.oo3d.rotate rads, 0, 0, context.focus
+              if 'y' == axis
+                context.oo3d.rotate 0, rads, 0, context.focus
+              if 'z' == axis
+                context.oo3d.rotate 0, 0, rads, context.focus
 
-              context.oo3d.transform config
               context.oo3d.render() #@todo remove when animation loop is done
 
               if ªN == ªtype context.focus #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it

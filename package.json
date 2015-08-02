@@ -1,6 +1,6 @@
 {
   "name": "magnubbin",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A super-rapid 3D prototyping system",
   "main": "build/magnubbin.js",
   "directories": {

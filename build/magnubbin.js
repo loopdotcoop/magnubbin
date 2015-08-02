@@ -202,7 +202,7 @@
         completions: ['move ', 'move x ', 'move y ', 'move z '],
         details: "move\n----\n@todo describe. \n\n@todo usage\n",
         runner: function(context, options) {
-          var axis, config, distance;
+          var axis, distance;
           axis = options[0];
           distance = options[1];
           if (!/^[xyz]$/.test(axis)) {
@@ -210,12 +210,15 @@
           } else if (!/^-?\d+(.\d+)?$/.test(distance)) {
             return "Distance " + distance + " is not valid - must be numeric";
           } else {
-            config = {
-              target: context.focus,
-              type: 'translate'
-            };
-            config[axis] = +distance;
-            context.oo3d.transform(config);
+            if ('x' === axis) {
+              context.oo3d.translate(+distance, 0, 0, context.focus);
+            }
+            if ('y' === axis) {
+              context.oo3d.translate(0, +distance, 0, context.focus);
+            }
+            if ('z' === axis) {
+              context.oo3d.translate(0, 0, +distance, context.focus);
+            }
             context.oo3d.render();
             if (ªN === ªtype(context.focus)) {
               return "Moved index '" + context.focus + "'";
@@ -225,12 +228,60 @@
           }
         }
       });
+      this.ookonsole.addTask('scale', {
+        summary: "Scale the Focused magnubbin",
+        completions: ['scale ', 'scale 2.0', 'scale 0.5'],
+        details: "scale\n----\n@todo describe. \n\n@todo usage\n",
+        runner: function(context, options) {
+          var factor;
+          factor = options[0];
+          if (!/^-?\d+(.\d+)?$/.test(factor)) {
+            return "Factor " + factor + " is not valid - must be numeric";
+          } else {
+            context.oo3d.scale(+factor, +factor, +factor, context.focus);
+            context.oo3d.render();
+            if (ªN === ªtype(context.focus)) {
+              return "Scaled index '" + context.focus + "'";
+            } else {
+              return "Scaled the camera";
+            }
+          }
+        }
+      });
+      this.ookonsole.addTask('flip', {
+        summary: "Flip the Focused magnubbin",
+        completions: ['flip ', 'flip 2.0', 'flip 0.5'],
+        details: "flip\n----\n@todo describe. \n\n@todo usage\n",
+        runner: function(context, options) {
+          var axis;
+          axis = options[0];
+          if (!/^[xyz]$/.test(axis)) {
+            return "Axis " + axis + " is not valid - use x, y, or z";
+          } else {
+            if ('x' === axis) {
+              context.oo3d.scale(-1, 1, 1, context.focus);
+            }
+            if ('y' === axis) {
+              context.oo3d.scale(1, -1, 1, context.focus);
+            }
+            if ('z' === axis) {
+              context.oo3d.scale(1, 1, -1, context.focus);
+            }
+            context.oo3d.render();
+            if (ªN === ªtype(context.focus)) {
+              return "Flipped index '" + context.focus + "'";
+            } else {
+              return "Flipped the camera";
+            }
+          }
+        }
+      });
       return this.ookonsole.addTask('rotate', {
-        summary: "Move the Focused magnubbin",
+        summary: "Rotate the Focused magnubbin",
         completions: ['rotate ', 'rotate x ', 'rotate y ', 'rotate z '],
         details: "rotate\n----\n@todo describe. \n\n@todo usage\n",
         runner: function(context, options) {
-          var axis, config, degrees;
+          var axis, degrees, rads;
           axis = options[0];
           degrees = options[1];
           if (!/^[xyz]$/.test(axis)) {
@@ -238,12 +289,16 @@
           } else if (!/^-?\d+(.\d+)?$/.test(degrees)) {
             return "Degrees " + degrees + " is not valid - must be numeric";
           } else {
-            config = {
-              target: context.focus,
-              type: 'rotate' + axis.toUpperCase(),
-              rad: degrees * Math.PI / 180
-            };
-            context.oo3d.transform(config);
+            rads = degrees * Math.PI / 180;
+            if ('x' === axis) {
+              context.oo3d.rotate(rads, 0, 0, context.focus);
+            }
+            if ('y' === axis) {
+              context.oo3d.rotate(0, rads, 0, context.focus);
+            }
+            if ('z' === axis) {
+              context.oo3d.rotate(0, 0, rads, context.focus);
+            }
             context.oo3d.render();
             if (ªN === ªtype(context.focus)) {
               return "Rotated index '" + context.focus + "' " + degrees + "º on axis " + axis;
