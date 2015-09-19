@@ -377,6 +377,49 @@ Add the `reset` task.
 
 
 
+Add the `save` task. 
+
+        @ookonsole.addTask 'save',
+          summary: "Convert the scene into an Nwang string"
+          completions: ['save ', 'save prefix '] #@todo needed?
+          details: """
+    save
+    -----
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+
+Generate the save-string. 
+
+            out = ''
+            out += 'c' + context.oo3d.read(context.cameraI, 'nwang') + ';'
+            for instance in context.oo3d._all
+              if 'Item.Mesh' == instance?.C
+                out += context.oo3d.read(instance.index, 'nwang') + ';'
+            out = out.slice 0, -1
+
+Add a prefix if required. 
+
+            pos = options.indexOf 'prefix'
+            if -1 != pos
+              if ! options[pos+1] then return "
+                The 'prefix' option must be followed by text"
+              else
+                out = options[pos+1] + out
+
+Invoke a browser prompt if required. 
+
+            if -1 != options.indexOf 'prompt'
+              prompt 'Save:', out
+
+            "Save: #{out}"
+
+
+
+
 Methods
 -------
 
@@ -437,11 +480,8 @@ Init the scene Add button.
 Init the scene Save button. 
 
         $('#grid9-scene-save').addEventListener 'mousedown', (event) =>
-          saveURI = ''
-          for instance in @oo3d._all
-            if 'Item.Mesh' == instance?.C
-              saveURI += @oo3d.read(instance.index, 'nwang') + ';'
-          prompt 'Save URI:', 'http://magnubbin.loop.coop/#' + saveURI.slice 0, -1
+          #@ookonsole.execute 'save prompt prefix http://magnubbin.loop.coop/?'
+          @ookonsole.execute 'save prompt prefix file:///Volumes/ldc/2015-Work/2015-Loop.Coop/Magnubbin/magnubbin/index.html?'
 
 Init the scene Reset button. 
 
