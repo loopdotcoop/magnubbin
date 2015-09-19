@@ -50,19 +50,11 @@ Init
 ----
 
 
-##### Inject CSS and HTML, and init the preset buttons
-
-If `config.$cssTarget` was passed a `<STYLE>` element, inject Magnubbin’s CSS. 
-
-        if @$cssTarget then injectCSS @$cssTarget, "Injected by #{ªC} #{ªV}"
-
+If `config.$cssTarget` was passed a `<STYLE>` element, inject Magnubbin’s CSS.  
 If `config.$htmlTarget` was passed an element, inject Magnubbin’s HTML. 
 
+        if @$cssTarget  then injectCSS  @$cssTarget,  "Injected by #{ªC} #{ªV}"
         if @$htmlTarget then injectHTML @$htmlTarget, "Injected by #{ªC} #{ªV}"
-
-Enable preset buttons. 
-
-        @initPresets()
 
 
 ##### Command-line
@@ -96,7 +88,7 @@ Instantiate and configure the 3D engine.
           @$main = $ '#oo3d-main'
           @oo3d = new Oo3d
             $main: @$main
-            bkgnd: new Float32Array([0.03, 0.1, 0.05, 1.0]) # dark green
+            bkgnd: new Float32Array([1,1,1,1]) # opaque white
 
 Load position and color Buffers. 
 
@@ -140,25 +132,25 @@ Load position and color Buffers.
 
 Create camera, program, renderer and layer. 
 
-          @cameraI = @oo3d.add('Item.Camera', {
+          @cameraI = @oo3d.add('Item.Camera',
             fovy:   0.785398163 # 45º
             aspect: @$main.width / @$main.height
-          })
+          )
 
-          @flatItemProgramI = @oo3d.add('Program.Flat', {
+          @flatItemProgramI = @oo3d.add('Program.FlatItem',
             subclass: 'Flat'
-          })
+          )
 
-          @rendererI = @oo3d.add('Renderer.Wireframe', {
+          @rendererI = @oo3d.add('Renderer.Wireframe',
             cameraI:  @cameraI
             programI: @flatItemProgramI
             meshIs:   []
-          })
+          )
 
-          @layerI = @oo3d.add('Layer.Simple', {
+          @layerI = @oo3d.add('Layer.Simple',
             rendererIs: [@rendererI]
             scissor:    [0,0,1,1]
-          })
+          )
 
 
 Render the initial scene. 
@@ -171,6 +163,12 @@ Deal with 3d engine init errors.
           $('#magnubbin-error').innerHTML = error
           $('#magnubbin-error').className = '' # remove '.hidden'
           return
+
+
+#### Enable preset buttons and click/drag on the 3d scene. 
+
+        @initPresets()
+        @initSceneUI()
 
 
 
@@ -193,10 +191,10 @@ Add the `add` task.
             oo3d = context.oo3d
             switch options[0]
               when 'ocrex'
-                index = oo3d.add('Item.Mesh', {
+                index = oo3d.add('Item.Mesh',
                   positionI:  context.pyramidPositionI
                   colorI:     context.pyramidColorI
-                })
+                )
                 oo3d._all[context.rendererI].meshes.push(
                   oo3d._all[index]
                 )
@@ -314,8 +312,33 @@ Xx. @todo describe
       initPresets: ->
         @$$presets = $$ '.magnubbin-presets >li'
         for $preset in @$$presets
-          $preset.removeEventListener 'click', onPresetClick
+          $preset.removeEventListener 'click', onPresetClick #@todo is this needed?
           $preset.addEventListener    'click', onPresetClick
+
+
+
+
+#### `initSceneUI()`
+
+Xx. @todo describe
+
+      initSceneUI: ->
+        $('.magnubbin-view').addEventListener 'mousedown', (event) =>
+          wh     = vpSize()
+          w      = wh[0]
+          h      = wh[1]
+          wRatio = @$main.width  / w
+          hRatio = @$main.height / h
+          x      = Math.round(wRatio * event.clientX)
+          y      = Math.round(hRatio * event.clientY)
+
+          color = @oo3d.getColorAt x, @$main.height - y
+          meshI = @oo3d.getMeshIByColor color
+
+          if 16777215 == meshI # `16777215` is the background
+            @ookonsole.execute 'blur'
+          else
+            @ookonsole.execute 'focus ' + meshI
 
 
 
@@ -379,6 +402,7 @@ Xx. @todo describe
         .magnubbin-view {
           left:   0;
           right:  0;
+          padding: 0;
           background: transparent; /* was rgba(30,50,40,0.7) */
         }
         .magnubbin-control {
@@ -617,13 +641,6 @@ The title at the top of the Control toggles display of the preexisting HTML.
 
 
 
-
-
-
-
-
-
-
 #### `onPresetClick()`
 
 Xx. @todo describe
@@ -634,3 +651,27 @@ Xx. @todo describe
       catch error
         $('#magnubbin-error').innerHTML = error
         $('#magnubbin-error').className = '' # remove '.hidden'
+
+
+
+
+#### `vpSize()`
+
+Returns an array with two elements, the viewport width and the viewport height. 
+Based on [this Stack Overflow answer. ](http://stackoverflow.com/a/11744120)  
+@todo test on iOS and Android  
+@todo improve performance
+
+    vpSize = (event) ->
+      d = document
+      e = d.documentElement
+      b = d.getElementsByTagName('body')[0]
+      w = window.innerWidth  || e.clientWidth  || b.clientWidth
+      h = window.innerHeight || e.clientHeight || b.clientHeight
+      [w,h]
+
+
+
+
+
+
