@@ -49,6 +49,9 @@ Index of the shape which has focus. The camera has focus if `undefined`.
 Init
 ----
 
+
+##### Inject CSS and HTML, and init the preset buttons
+
 If `config.$cssTarget` was passed a `<STYLE>` element, inject Magnubbin’s CSS. 
 
         if @$cssTarget then injectCSS @$cssTarget, "Injected by #{ªC} #{ªV}"
@@ -59,10 +62,10 @@ If `config.$htmlTarget` was passed an element, inject Magnubbin’s HTML.
 
 Enable preset buttons. 
 
-        @$$presets = $$ '.magnubbin-presets >li'
-        for $preset in @$$presets
-          $preset.addEventListener 'click', (event) =>
-            @ookonsole.execute event.target.getAttribute 'data-command'
+        @initPresets()
+
+
+##### Command-line
 
         try
 
@@ -76,18 +79,98 @@ Instantiate, configure and start the command-line functionality.
           @ookonsole.show()
           @ookonsole.start()
 
-
-Instantiate, configure and render the 3D functionality. 
-
-          @oo3d = new Oo3d
-            $main: $ '#oo3d-main'
-          @oo3d.render()
-
-Deal with init errors. 
+Deal with command-line init errors. 
 
         catch error
           $('#magnubbin-error').innerHTML = error
           $('#magnubbin-error').className = '' # remove '.hidden'
+          return
+
+
+##### 3D engine
+
+        try
+
+Instantiate and configure the 3D engine. 
+
+          @$main = $ '#oo3d-main'
+          @oo3d = new Oo3d
+            $main: @$main
+            bkgnd: new Float32Array([0.03, 0.1, 0.05, 1.0]) # dark green
+
+Load position and color Buffers. 
+
+          @pyramidPositionI = @oo3d.add('Buffer.Position', { data:[
+            # front face
+             0.0,  1.0,  0.0,
+            -1.0, -1.0,  1.0,
+             1.0, -1.0,  1.0,
+            # right face
+             0.0,  1.0,  0.0,
+             1.0, -1.0,  1.0,
+             1.0, -1.0, -1.0,
+            # back face
+             0.0,  1.0,  0.0,
+             1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            # left face
+             0.0,  1.0,  0.0,
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0
+          ]})
+
+          @pyramidColorI = @oo3d.add('Buffer.Color', { data:[
+            # Front face
+             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
+             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
+             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
+            # Right face
+             0.0,  0.25,  0.0,  0.75, # translucent lime
+             0.0,  0.25,  0.0,  0.75, # translucent lime
+             0.0,  0.25,  0.0,  0.75, # translucent lime
+            # Back face
+             1.0,  0.25,  0.0,  0.10, # translucent orange
+             1.0,  0.25,  0.0,  0.10, # translucent orange
+             1.0,  0.25,  0.0,  0.10, # translucent orange
+            # Left face
+             0.25,  0.5,  1.0,  0.05, # translucent light cyan
+             0.25,  0.5,  1.0,  0.05, # translucent light cyan
+             0.25,  0.5,  1.0,  0.05  # translucent light cyan
+          ]})
+
+Create camera, program, renderer and layer. 
+
+          @cameraI = @oo3d.add('Item.Camera', {
+            fovy:   0.785398163 # 45º
+            aspect: @$main.width / @$main.height
+          })
+
+          @flatItemProgramI = @oo3d.add('Program.Flat', {
+            subclass: 'Flat'
+          })
+
+          @rendererI = @oo3d.add('Renderer.Wireframe', {
+            cameraI:  @cameraI
+            programI: @flatItemProgramI
+            meshIs:   []
+          })
+
+          @layerI = @oo3d.add('Layer.Simple', {
+            rendererIs: [@rendererI]
+            scissor:    [0,0,1,1]
+          })
+
+
+Render the initial scene. 
+
+          @oo3d.render()
+
+Deal with 3d engine init errors. 
+
+        catch error
+          $('#magnubbin-error').innerHTML = error
+          $('#magnubbin-error').className = '' # remove '.hidden'
+          return
 
 
 
@@ -110,76 +193,20 @@ Add the `add` task.
             oo3d = context.oo3d
             switch options[0]
               when 'ocrex'
-                index = oo3d.addBuffer
-                  positions: [
-                    # 4:5:5 triangle
-                    -2.0,  0.3,    -1.84,
-                     2.0,  0.3,    -1.84,
-                     0.0,  0.0,     2.742566667,
-                    # first 3:4:5 triangle
-                     0.0,  0.0,     2.742566667,
-                     0.0,  2.2678,  0.77866667,
-                    -2.0,  0.3,    -1.84,
-                    # 4:4:4 triangle
-                    -2.0,  0.3,    -1.84,
-                     0.0,  2.2678,  0.77866667,
-                     2.0,  0.3,    -1.84,
-                    # second 3:4:5 triangle
-                     2.0,  0.3,    -1.84,
-                     0.0,  2.2678,  0.77866667,
-                     0.0,  0.0,     2.742566667,
-                  ]
-                  colors: [
-                    # 4:5:5 triangle
-                     1.0,  0.0,  0.0,  1.0, # red
-                     1.0,  0.0,  1.0,  1.0, # magenta
-                     1.0,  0.0,  0.5,  1.0  # red/mag
-                    # first 3:4:5 triangle
-                     1.0,  0.0,  0.0,  1.0, # red
-                     1.0,  0.0,  1.0,  1.0, # magenta
-                     1.0,  0.0,  0.5,  1.0  # red/mag
-                    # 4:4:4 triangle
-                     1.0,  0.0,  0.0,  1.0, # red
-                     1.0,  0.0,  1.0,  1.0, # magenta
-                     1.0,  0.0,  0.5,  1.0  # red/mag
-                    # second 3:4:5 triangle
-                     1.0,  0.0,  0.0,  1.0, # red
-                     1.0,  0.0,  1.0,  1.0, # magenta
-                     1.0,  0.0,  0.5,  1.0  # red/mag
-                  ]
+                index = oo3d.add('Item.Mesh', {
+                  positionI:  context.pyramidPositionI
+                  colorI:     context.pyramidColorI
+                })
+                oo3d._all[context.rendererI].meshes.push(
+                  oo3d._all[index]
+                )
                 context.changeFocus index
                 oo3d.render() #@todo remove when animation loop is done
-                "Added slyce. Focused on index #{index}"
-              when 'slyce'
-                index = oo3d.addBuffer
-                  positions: [
-                     0.0,  0.3,  1.0,
-                    -0.4, -0.5,  1.0,
-                     0.8, -0.3,  1.0
-                  ]
-                  colors: [
-                     1.0,  0.0,  0.0,  1.0, # red
-                     0.0,  1.0,  0.0,  1.0, # green
-                     0.0,  0.0,  1.0,  1.0  # blue
-                  ]
-                context.changeFocus index
-                oo3d.render() #@todo remove when animation loop is done
-                "Added slyce. Focused on index #{index}"
-              when 'betr'
-                index = oo3d.addBuffer
-                  positions: [
-                     1.0,  0.3, -1.0,
-                    -0.4, -0.5,  0.0,
-                     0.8,  0.3, -1.0
-                  ]
-                  colors: [
-                     1.0,  0.0,  0.0,  1.0, # red
-                     0.0,  1.0,  0.0,  1.0, # green
-                     0.0,  0.0,  1.0,  1.0  # blue
-                  ]
-                context.changeFocus index
-                oo3d.render() #@todo remove when animation loop is done
-                "Added betr. Focused on index #{index}"
+                $('.magnubbin-focus-presets').innerHTML += """
+                  <li id="magnubbin-focus-preset-#{index}" 
+                  data-command="focus #{index}">Ocrex##{index}</li>"""
+                context.initPresets()
+                "Added ocrex. Focused on index #{index}"
               else
                 "'#{options[0]}' not recognised"
 
@@ -203,12 +230,15 @@ Add the `focus` task.
             index = options[0]
             if ! /^\d+$/.test index
               "'#{index}' is not a valid index - must be an integer"
-            else if ! (target = context.oo3d.buffers[+index])
-              "Index '#{index}' does not exist"
+            else if 'Item.Mesh' != context.oo3d._all[+index]?.C
+              "'#{index}' is not the index of an Item.Mesh"
             else
               context.changeFocus +index
               context.oo3d.render() #@todo remove when animation loop is done
               "Focused on index '#{index}'"
+
+
+
 
 Add the `blur` task. 
 
@@ -224,20 +254,20 @@ Add the `blur` task.
 
     """
           runner: (context, options) ->
-            context.changeFocus undefined
+            context.changeFocus() # `focusIndex` argument is undefined
             context.oo3d.render() #@todo remove when animation loop is done
             "Focused on the camera"
 
 
 
 
-Add the `move` task. 
+Add the `edit` task. 
 
-        @ookonsole.addTask 'move',
-          summary: "Move the Focused magnubbin"
-          completions: ['move ','move x ','move y ','move z ']
+        @ookonsole.addTask 'edit',
+          summary: "Edit the focused Item.Mesh, or the camera"
+          completions: ['edit ']
           details: """
-    move
+    edit
     ----
     @todo describe. 
 
@@ -245,135 +275,49 @@ Add the `move` task.
 
     """
           runner: (context, options) ->
-            axis     = options[0]
-            distance = options[1]
-            if ! /^[xyz]$/.test axis
-              "Axis #{axis} is not valid - use x, y, or z"
-            else if ! /^-?\d+(.\d+)?$/.test distance #@todo make numeric
-              "Distance #{distance} is not valid - must be numeric"
-            else
-              if 'x' == axis
-                context.oo3d.translate +distance, 0, 0, context.focusIndex
-              if 'y' == axis
-                context.oo3d.translate 0, +distance, 0, context.focusIndex
-              if 'z' == axis
-                context.oo3d.translate 0, 0, +distance, context.focusIndex
-
-              context.oo3d.render() #@todo remove when animation loop is done
-
-              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Moved index '#{context.focusIndex}'"
+            set   = {}
+            delta = {}
+            i = 0; l = options.length
+            while i < l
+              option =  options[i++]
+              value  = +options[i++]
+              if ! /^d?[rst][xyz]$/.test option then return "
+                `options[#{i-2}]` is invalid, use 'dtx', 'sz', etc"
+              if isNaN value then return "
+                `options[#{i-1}]` is invalid, must be numeric"
+              if 'd' != option.charAt 0
+                set[   option[0] + option[1].toUpperCase() ] = value
               else
-                "Moved the camera"
+                delta[ option[1] + option[2].toUpperCase() ] = value
 
-
-
-
-Add the `scale` task. 
-
-        @ookonsole.addTask 'scale',
-          summary: "Scale the Focused magnubbin"
-          completions: ['scale ','scale 2.0','scale 0.5']
-          details: """
-    scale
-    ----
-    @todo describe. 
-
-    @todo usage
-
-    """
-          runner: (context, options) ->
-            factor = options[0]
-            if ! /^-?\d+(.\d+)?$/.test factor #@todo make numeric
-              "Factor #{factor} is not valid - must be numeric"
-            else
-              context.oo3d.scale +factor, +factor, +factor, context.focusIndex
+            if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
+              context.oo3d.edit context.focusIndex, set, delta
               context.oo3d.render() #@todo remove when animation loop is done
-
-              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Scaled index '#{context.focusIndex}'"
-              else
-                "Scaled the camera"
-
-
-
-
-Add the `flip` task. 
-
-        @ookonsole.addTask 'flip',
-          summary: "Flip the Focused magnubbin"
-          completions: ['flip ','flip 2.0','flip 0.5']
-          details: """
-    flip
-    ----
-    @todo describe. 
-
-    @todo usage
-
-    """
-          runner: (context, options) ->
-            axis = options[0]
-            if ! /^[xyz]$/.test axis
-              "Axis #{axis} is not valid - use x, y, or z"
+              "Edited index '#{context.focusIndex}'"
             else
-              if 'x' == axis
-                context.oo3d.scale -1, 1, 1, context.focusIndex
-              if 'y' == axis
-                context.oo3d.scale 1, -1, 1, context.focusIndex
-              if 'z' == axis
-                context.oo3d.scale 1, 1, -1, context.focusIndex
-
+              context.oo3d.edit context.cameraI, set, delta
+              context.oo3d._all[context.cameraI].updateCamera() #@todo remove when Item.Camera updates itself after an `edit()`
               context.oo3d.render() #@todo remove when animation loop is done
-
-              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Flipped index '#{context.focusIndex}'"
-              else
-                "Flipped the camera"
-
-
-
-
-Add the `rotate` task. 
-
-        @ookonsole.addTask 'rotate',
-          summary: "Rotate the Focused magnubbin"
-          completions: ['rotate ','rotate x ','rotate y ','rotate z ']
-          details: """
-    rotate
-    ----
-    @todo describe. 
-
-    @todo usage
-
-    """
-          runner: (context, options) ->
-            axis    = options[0]
-            degrees = options[1]
-            if ! /^[xyz]$/.test axis
-              "Axis #{axis} is not valid - use x, y, or z"
-            else if ! /^-?\d+(.\d+)?$/.test degrees #@todo make numeric
-              "Degrees #{degrees} is not valid - must be numeric"
-            else
-              rads = degrees * Math.PI / 180
-              if 'x' == axis
-                context.oo3d.rotate rads, 0, 0, context.focusIndex
-              if 'y' == axis
-                context.oo3d.rotate 0, rads, 0, context.focusIndex
-              if 'z' == axis
-                context.oo3d.rotate 0, 0, rads, context.focusIndex
-
-              context.oo3d.render() #@todo remove when animation loop is done
-
-              if ªN == ªtype context.focusIndex #@todo make the camera `0`, and change oo3d’s render loop to avoid rendering it
-                "Rotated '#{context.focusIndex}' #{degrees}º on axis #{axis}"
-              else
-                "Rotated the camera #{degrees}º on axis #{axis}"
+              "Edited the camera"
 
 
 
 
 Methods
 -------
+
+
+#### `initPresets()`
+
+Xx. @todo describe
+
+      initPresets: ->
+        @$$presets = $$ '.magnubbin-presets >li'
+        for $preset in @$$presets
+          $preset.removeEventListener 'click', onPresetClick
+          $preset.addEventListener    'click', onPresetClick
+
+
 
 
 #### `changeFocus()`
@@ -387,15 +331,16 @@ Update the `focusIndex` property.
 
         @focusIndex = focusIndex
 
-Set all shapes’ render modes to solid-color. @todo quicker than this?
+Set all Item.Mesh render modes to solid-color. @todo quicker than this?
 
-        @oo3d.setRenderMode('TRIANGLES', i) for i in [0..@oo3d.buffers.length-1]
+        for instance in @oo3d._all
+          if 'Item.Mesh' == instance.C
+            @oo3d.setRenderMode 'TRIANGLES', instance.index
 
 Set the newly focused shape’s render mode to wireframe. 
 
         if ªN == typeof focusIndex
           @oo3d.setRenderMode 'LINE_LOOP', focusIndex
-
 
 
 
@@ -434,7 +379,7 @@ Xx. @todo describe
         .magnubbin-view {
           left:   0;
           right:  0;
-          background: rgba(30,50,40,0.7);
+          background: transparent; /* was rgba(30,50,40,0.7) */
         }
         .magnubbin-control {
           display: flex;
@@ -623,39 +568,32 @@ Inject HTML elements for the basic Magnubbin framework.
             <ul class="magnubbin-presets">
               <li data-command="clear">Clear</li>
               <li data-command="add ocrex">Add Ocrex</li>
-              <li data-command="add slyce">Add Slyce</li>
-              <li data-command="add betr">Add Betr</li>
             </ul>
             <ul class="magnubbin-presets">
-              <li data-command="rotate x -20">rx-</li>
-              <li data-command="rotate x 20" >rx+</li>
-              <li data-command="rotate y -20">ry-</li>
-              <li data-command="rotate y 20" >ry+</li>
-              <li data-command="rotate z -20">rz-</li>
-              <li data-command="rotate z 20" >rz+</li>
+              <li data-command="edit drx -20">rx-</li>
+              <li data-command="edit drx 20" >rx+</li>
+              <li data-command="edit dry -20">ry-</li>
+              <li data-command="edit dry 20" >ry+</li>
+              <li data-command="edit drz -20">rz-</li>
+              <li data-command="edit drz 20" >rz+</li>
             </ul>
             <ul class="magnubbin-presets">
-              <li data-command="scale 2.0">&times;2</li>
-              <li data-command="scale 0.5" >&divide2</li>
-              <li data-command="flip x">fx</li>
-              <li data-command="flip y">fy</li>
-              <li data-command="flip z">fz</li>
+              <li data-command="edit dsx 2.0 dsy 2.0 dsz 2.0">&times;2</li>
+              <li data-command="edit dsx 0.5 dsy 0.5 dsz 0.5" >&divide2</li>
+              <li data-command="edit dsx -1">fx</li>
+              <li data-command="edit dsy -1">fy</li>
+              <li data-command="edit dsz -1">fz</li>
             </ul>
             <ul class="magnubbin-presets">
-              <li data-command="move x -0.2">x-</li>
-              <li data-command="move x 0.2" >x+</li>
-              <li data-command="move y -0.2">y-</li>
-              <li data-command="move y 0.2" >y+</li>
-              <li data-command="move z -0.2">z-</li>
-              <li data-command="move z 0.2" >z+</li>
+              <li data-command="edit dtx -0.2">x-</li>
+              <li data-command="edit dtx 0.2" >x+</li>
+              <li data-command="edit dty -0.2">y-</li>
+              <li data-command="edit dty 0.2" >y+</li>
+              <li data-command="edit dtz -0.2">z-</li>
+              <li data-command="edit dtz 0.2" >z+</li>
             </ul>
-            <ul class="magnubbin-presets">
+            <ul class="magnubbin-presets magnubbin-focus-presets">
               <li data-command="blur">Focus Camera</li>
-              <li data-command="focus 0">0</li>
-              <li data-command="focus 1">1</li>
-              <li data-command="focus 2">2</li>
-              <li data-command="focus 3">3</li>
-              <li data-command="focus 4">4</li>
             </ul>
             <pre id="ookonsole-display"></pre>
             <div><input id="ookonsole-command"></div>
@@ -677,3 +615,22 @@ The title at the top of the Control toggles display of the preexisting HTML.
           $preexisting.className = 'magnubbin-preexisting active'
 
 
+
+
+
+
+
+
+
+
+
+#### `onPresetClick()`
+
+Xx. @todo describe
+
+    onPresetClick = (event) ->
+      try
+        window.magnubbin.ookonsole.execute event.target.getAttribute 'data-command'
+      catch error
+        $('#magnubbin-error').innerHTML = error
+        $('#magnubbin-error').className = '' # remove '.hidden'
