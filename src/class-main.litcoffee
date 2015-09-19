@@ -44,10 +44,30 @@ Index of the shape which has focus. The camera has focus if `undefined`.
         @focusI = undefined
 
 
+#### `downPos <array|null>`
+Xx. 
+
+        @downPos = null
+
+
 #### `deltaCalc <function>`
 Xx. 
 
         @deltaCalc = (x, y) -> {}
+
+
+#### `snapshot <object|null>`
+Xx. 
+
+        @snapshot = null
+
+
+#### `delta <object|null>`
+Xx. 
+
+        @delta = null
+
+
 
 
 Init
@@ -430,19 +450,19 @@ Init the scene Reset button.
 
 Init the scene transform buttons. 
 
-        sceneDeltaFns =
+        scenedeltaCalcs =
           'grid9-scene-txy'  : txyDelta
           'grid9-scene-txz'  : txzDelta
           'grid9-scene-rxy'  : rxyDelta
           'grid9-scene-ryz'  : ryzDelta
           'grid9-scene-scale': scaleDelta
-        for id,deltaFn of sceneDeltaFns
-          ((id,deltaFn)-> # capture each pair of id/deltaFn values in a closure
+        for id,deltaCalc of scenedeltaCalcs
+          ((id,deltaCalc)-> # capture each id/deltaCalc pair in a closure
             $('#' + id).addEventListener 'mousedown', (event) ->
-              onMousedown  event, $('#grid9-scene'), deltaFn
+              onMousedown  event, $('#grid9-scene'), deltaCalc
             $('#' + id).addEventListener 'touchstart', (event) ->
-              onTouchstart event, $('#grid9-scene'), deltaFn
-          )(id,deltaFn)
+              onTouchstart event, $('#grid9-scene'), deltaCalc
+          )(id,deltaCalc)
           undefined # simplify compiled JS
 
 
@@ -460,7 +480,7 @@ Init the add mesh buttons.
           'grid9-add-shape-1': 'slyce'
         for id,meshName of meshNames
           main = @
-          ((id,meshName)-> # capture each pair of id/deltaFn values in a closure
+          ((id,meshName)-> # capture each id/meshName pair in a closure
             $('#' + id).addEventListener 'mousedown', (event) ->
               main.ookonsole.execute 'add ' + meshName
           )(id,meshName)
@@ -486,19 +506,19 @@ Init the mesh Reset button.
 
 Init the mesh transform buttons. 
 
-        meshDeltaFns =
+        meshdeltaCalcs =
           'grid9-mesh-txy'  : txyDelta
           'grid9-mesh-txz'  : txzDelta
           'grid9-mesh-rxy'  : rxyDelta
           'grid9-mesh-ryz'  : ryzDelta
           'grid9-mesh-scale': scaleDelta
-        for id,deltaFn of meshDeltaFns
-          ((id,deltaFn)-> # capture each pair of id/deltaFn values in a closure
+        for id,deltaCalc of meshdeltaCalcs
+          ((id,deltaCalc)-> # capture each id/deltaCalc pair in a closure
             $('#' + id).addEventListener 'mousedown', (event) ->
-              onMousedown  event, $('#grid9-mesh'), deltaFn
+              onMousedown  event, $('#grid9-mesh'), deltaCalc
             $('#' + id).addEventListener 'touchstart', (event) ->
-              onTouchstart event, $('#grid9-mesh'), deltaFn
-          )(id,deltaFn)
+              onTouchstart event, $('#grid9-mesh'), deltaCalc
+          )(id,deltaCalc)
           undefined # simplify compiled JS
 
 
@@ -1036,6 +1056,7 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
       main.deltaCalc = deltaCalc
       main.downPos = [event.clientX, event.clientY]
       main.snapshot = main.oo3d.read(main.focusI or main.cameraI)
+      main.delta = null
       window.addEventListener 'mousemove', onMousemove
       window.addEventListener 'mouseup'  , onMouseup
 
@@ -1046,6 +1067,7 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
       touches = event.changedTouches
       main.downPos = [touches[0].pageX, touches[0].pageY]
       main.snapshot = main.oo3d.read(main.focusI or main.cameraI)
+      main.delta = null
       window.addEventListener 'touchmove', onTouchmove
       window.addEventListener 'touchend' , onTouchend
 
@@ -1062,7 +1084,8 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
         oo3d    = main.oo3d
         x       = event.clientX - main.downPos[0]
         y       = event.clientY - main.downPos[1]
-        oo3d.edit main.focusI or main.cameraI, main.snapshot, main.deltaCalc(x, y)
+        main.delta = main.deltaCalc x, y
+        oo3d.edit main.focusI or main.cameraI, main.snapshot, main.delta
         if ! main.focusI then oo3d._all[main.cameraI].updateCamera()
         oo3d.render()
         main.updateMeshInfo()
@@ -1074,7 +1097,8 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
         touches = event.changedTouches
         x       = touches[0].pageX - main.downPos[0]
         y       = touches[0].pageY - main.downPos[1]
-        oo3d.edit main.focusI or main.cameraI, main.snapshot, main.deltaCalc(x, y)
+        main.delta = main.deltaCalc x, y
+        oo3d.edit main.focusI or main.cameraI, main.snapshot, main.delta
         if ! main.focusI then oo3d._all[main.cameraI].updateCamera()
         oo3d.render()
         main.updateMeshInfo()
@@ -1087,18 +1111,48 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
 @todo describe
 
     onMouseup = (event) ->
-      main = window.magnubbin
       window.removeEventListener 'mousemove', onMousemove
       window.removeEventListener 'mouseup'  , onMouseup
-      main.downPos = null
-      main.deltaCalc = (x, y) -> {}
+      afterInteraction()
 
     onTouchend = (event) ->
-      main = window.magnubbin
       window.removeEventListener 'touchmove', onTouchmove
       window.removeEventListener 'touchend' , onTouchend
-      main.downPos = null
+      afterInteraction()
+
+
+
+
+#### `afterInteraction()`
+
+@todo describe
+
+    afterInteraction = ->
+      main = window.magnubbin
+
+If the user has just completed a UI edit, convert `delta` to an 'edit' command. 
+
+      if main.delta
+        command = '§ edit'
+        for option in ['rX','rY','rZ','sX','sY','sZ','tX','tY','tZ']
+          if ªN == typeof main.delta[option]
+            command += ' d' + option.toLowerCase() + ' ' + main.delta[option]
+
+Append the 'edit' command to the log-display. Note that it isn’t executed. 
+
+        $display = main.ookonsole.$display
+        hasScrolledToEnd =
+          $display.scrollTop > $display.scrollHeight - $display.offsetHeight
+        $display.innerHTML += command + '\n'
+        if hasScrolledToEnd
+          $display.scrollTop = $display.scrollHeight
+
+Reset Magnubbin state. 
+
+      main.downPos   = null
       main.deltaCalc = (x, y) -> {}
+      main.snapshot  = null;
+      main.delta     = null;
 
 
 

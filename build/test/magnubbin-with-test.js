@@ -3,7 +3,7 @@
 /*! Magnubbin 0.0.12 //// MIT Licence //// http://magnubbin.loop.coop/ */
 
 (function() {
-  var Main, Ookonsole, Tudor, grid9IsActive, grid9OnlyShow, injectCSS, injectHTML, onMousedown, onMousemove, onMouseup, onPresetClick, onTouchend, onTouchmove, onTouchstart, rxyDelta, ryzDelta, scaleDelta, tudor, txyDelta, txzDelta, vpSize, ª, ªA, ªB, ªC, ªE, ªF, ªN, ªO, ªR, ªS, ªU, ªV, ªX, ªex, ªhas, ªredefine, ªtype, ªuid,
+  var Main, Ookonsole, Tudor, afterInteraction, grid9IsActive, grid9OnlyShow, injectCSS, injectHTML, onMousedown, onMousemove, onMouseup, onPresetClick, onTouchend, onTouchmove, onTouchstart, rxyDelta, ryzDelta, scaleDelta, tudor, txyDelta, txzDelta, vpSize, ª, ªA, ªB, ªC, ªE, ªF, ªN, ªO, ªR, ªS, ªU, ªV, ªX, ªex, ªhas, ªredefine, ªtype, ªuid,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   ªC = 'Magnubbin';
@@ -98,9 +98,12 @@
       this.oo3d = null;
       this.$$presets = null;
       this.focusI = void 0;
+      this.downPos = null;
       this.deltaCalc = function(x, y) {
         return {};
       };
+      this.snapshot = null;
+      this.delta = null;
       if (this.$cssTarget) {
         injectCSS(this.$cssTarget, "Injected by " + ªC + " " + ªV);
       }
@@ -298,7 +301,7 @@
     };
 
     Main.prototype.initGrid9 = function() {
-      var deltaFn, fn1, fn2, fn3, id, main, meshDeltaFns, meshName, meshNames, sceneDeltaFns;
+      var deltaCalc, fn1, fn2, fn3, id, main, meshName, meshNames, meshdeltaCalcs, scenedeltaCalcs;
       $('.magnubbin-view').addEventListener('mousedown', (function(_this) {
         return function(event) {
           var color, h, hRatio, meshI, w, wRatio, wh, x, y;
@@ -340,24 +343,24 @@
           return _this.ookonsole.execute('reset');
         };
       })(this));
-      sceneDeltaFns = {
+      scenedeltaCalcs = {
         'grid9-scene-txy': txyDelta,
         'grid9-scene-txz': txzDelta,
         'grid9-scene-rxy': rxyDelta,
         'grid9-scene-ryz': ryzDelta,
         'grid9-scene-scale': scaleDelta
       };
-      fn1 = function(id, deltaFn) {
+      fn1 = function(id, deltaCalc) {
         $('#' + id).addEventListener('mousedown', function(event) {
-          return onMousedown(event, $('#grid9-scene'), deltaFn);
+          return onMousedown(event, $('#grid9-scene'), deltaCalc);
         });
         return $('#' + id).addEventListener('touchstart', function(event) {
-          return onTouchstart(event, $('#grid9-scene'), deltaFn);
+          return onTouchstart(event, $('#grid9-scene'), deltaCalc);
         });
       };
-      for (id in sceneDeltaFns) {
-        deltaFn = sceneDeltaFns[id];
-        fn1(id, deltaFn);
+      for (id in scenedeltaCalcs) {
+        deltaCalc = scenedeltaCalcs[id];
+        fn1(id, deltaCalc);
         void 0;
       }
       $('#grid9-add-back').addEventListener('mousedown', (function(_this) {
@@ -393,24 +396,24 @@
           return _this.ookonsole.execute('reset');
         };
       })(this));
-      meshDeltaFns = {
+      meshdeltaCalcs = {
         'grid9-mesh-txy': txyDelta,
         'grid9-mesh-txz': txzDelta,
         'grid9-mesh-rxy': rxyDelta,
         'grid9-mesh-ryz': ryzDelta,
         'grid9-mesh-scale': scaleDelta
       };
-      fn3 = function(id, deltaFn) {
+      fn3 = function(id, deltaCalc) {
         $('#' + id).addEventListener('mousedown', function(event) {
-          return onMousedown(event, $('#grid9-mesh'), deltaFn);
+          return onMousedown(event, $('#grid9-mesh'), deltaCalc);
         });
         return $('#' + id).addEventListener('touchstart', function(event) {
-          return onTouchstart(event, $('#grid9-mesh'), deltaFn);
+          return onTouchstart(event, $('#grid9-mesh'), deltaCalc);
         });
       };
-      for (id in meshDeltaFns) {
-        deltaFn = meshDeltaFns[id];
-        fn3(id, deltaFn);
+      for (id in meshdeltaCalcs) {
+        deltaCalc = meshdeltaCalcs[id];
+        fn3(id, deltaCalc);
         void 0;
       }
       $('#grid9-flip-back').addEventListener('mousedown', (function(_this) {
@@ -528,6 +531,7 @@
     main.deltaCalc = deltaCalc;
     main.downPos = [event.clientX, event.clientY];
     main.snapshot = main.oo3d.read(main.focusI || main.cameraI);
+    main.delta = null;
     window.addEventListener('mousemove', onMousemove);
     return window.addEventListener('mouseup', onMouseup);
   };
@@ -540,6 +544,7 @@
     touches = event.changedTouches;
     main.downPos = [touches[0].pageX, touches[0].pageY];
     main.snapshot = main.oo3d.read(main.focusI || main.cameraI);
+    main.delta = null;
     window.addEventListener('touchmove', onTouchmove);
     return window.addEventListener('touchend', onTouchend);
   };
@@ -551,7 +556,8 @@
       oo3d = main.oo3d;
       x = event.clientX - main.downPos[0];
       y = event.clientY - main.downPos[1];
-      oo3d.edit(main.focusI || main.cameraI, main.snapshot, main.deltaCalc(x, y));
+      main.delta = main.deltaCalc(x, y);
+      oo3d.edit(main.focusI || main.cameraI, main.snapshot, main.delta);
       if (!main.focusI) {
         oo3d._all[main.cameraI].updateCamera();
       }
@@ -568,7 +574,8 @@
       touches = event.changedTouches;
       x = touches[0].pageX - main.downPos[0];
       y = touches[0].pageY - main.downPos[1];
-      oo3d.edit(main.focusI || main.cameraI, main.snapshot, main.deltaCalc(x, y));
+      main.delta = main.deltaCalc(x, y);
+      oo3d.edit(main.focusI || main.cameraI, main.snapshot, main.delta);
       if (!main.focusI) {
         oo3d._all[main.cameraI].updateCamera();
       }
@@ -578,25 +585,42 @@
   };
 
   onMouseup = function(event) {
-    var main;
-    main = window.magnubbin;
     window.removeEventListener('mousemove', onMousemove);
     window.removeEventListener('mouseup', onMouseup);
-    main.downPos = null;
-    return main.deltaCalc = function(x, y) {
-      return {};
-    };
+    return afterInteraction();
   };
 
   onTouchend = function(event) {
-    var main;
-    main = window.magnubbin;
     window.removeEventListener('touchmove', onTouchmove);
     window.removeEventListener('touchend', onTouchend);
+    return afterInteraction();
+  };
+
+  afterInteraction = function() {
+    var $display, command, hasScrolledToEnd, j, len, main, option, ref;
+    main = window.magnubbin;
+    if (main.delta) {
+      command = '§ edit';
+      ref = ['rX', 'rY', 'rZ', 'sX', 'sY', 'sZ', 'tX', 'tY', 'tZ'];
+      for (j = 0, len = ref.length; j < len; j++) {
+        option = ref[j];
+        if (ªN === typeof main.delta[option]) {
+          command += ' d' + option.toLowerCase() + ' ' + main.delta[option];
+        }
+      }
+      $display = main.ookonsole.$display;
+      hasScrolledToEnd = $display.scrollTop > $display.scrollHeight - $display.offsetHeight;
+      $display.innerHTML += command + '\n';
+      if (hasScrolledToEnd) {
+        $display.scrollTop = $display.scrollHeight;
+      }
+    }
     main.downPos = null;
-    return main.deltaCalc = function(x, y) {
+    main.deltaCalc = function(x, y) {
       return {};
     };
+    main.snapshot = null;
+    return main.delta = null;
   };
 
   txyDelta = function(x, y) {
