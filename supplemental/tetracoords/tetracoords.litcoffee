@@ -9,7 +9,7 @@ tetraCoords()
 - __J__ The point in the middle, not touching the table
 
 
-To watch and compile automatically: 
+To watch and compile automatically:  
 ```bash
 coffee --watch --compile supplemental/tetracoords/tetracoords.litcoffee
 ```
@@ -23,6 +23,8 @@ coffee --watch --compile supplemental/tetracoords/tetracoords.litcoffee
 - `e <number>`  the edge joining __J — H__
 - `f <number>`  the edge joining __J — I__
 - `<array>`     twelve numbers, representing (x,y,z) coords of __G, H, I and J__
+
+Returns an array of vertex coordinates for a tetrahedron of given edge-lengths. 
 
       window.tetraCoords = (a, b, c, d, e, f) ->
         M = 'tetraCoords()\n  '
