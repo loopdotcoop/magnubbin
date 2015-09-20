@@ -653,8 +653,8 @@ Init the scene Add button.
 Init the scene Save button. 
 
         $('#grid9-scene-save').addEventListener 'mousedown', (event) =>
-          baseURL = window.location.protocol + '//' + window.location.pathname
-          @ookonsole.execute "save prompt prefix #{baseURL}?scene_v1="
+          @ookonsole.execute "save prompt prefix
+            #{location.protocol}//#{location.host+location.pathname}?scene_v1="
 
 Init the scene Reset button. 
 

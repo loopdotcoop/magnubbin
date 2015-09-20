@@ -3605,9 +3605,7 @@ for (i=0, l=$arts.length; i<l; i++) {
       });
       $('#grid9-scene-save').addEventListener('mousedown', (function(_this) {
         return function(event) {
-          var baseURL;
-          baseURL = window.location.protocol + '//' + window.location.pathname;
-          return _this.ookonsole.execute("save prompt prefix " + baseURL + "?scene_v1=");
+          return _this.ookonsole.execute("save prompt prefix " + location.protocol + "//" + (location.host + location.pathname) + "?scene_v1=");
         };
       })(this));
       $('#grid9-scene-reset').addEventListener('mousedown', (function(_this) {
