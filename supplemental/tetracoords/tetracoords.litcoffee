@@ -37,7 +37,7 @@ Run basic validation of the six arguments.
           if 9007199254740991 < arg or 0 > arg then throw RangeError "
             #{M}Argument `#{name}` is #{arg} not 0 or a +ve number < 2^53"
 
-Initialize the output array, and place __G,__ (the point on the tabletop 
+Initialize the output array, and place __G__ (the point on the tabletop 
 furthest away from you) at the origin. 
 
         out = [

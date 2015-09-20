@@ -315,6 +315,12 @@ Deal with 3d engine init errors.
           return
 
 
+#### Display a scene, if provided by the `scene_v1` query-string. 
+
+        query = parseQuery window.location.search.slice 1
+        if query.scene_v1 then @ookonsole.execute 'restore ' + query.scene_v1
+
+
 #### Enable preset buttons and click/drag on the 3d scene. 
 
         @initPresets()
@@ -365,7 +371,7 @@ Add the `delete` task.
 
         @ookonsole.addTask 'delete',
           summary: "Remove the focused Item.Mesh from the scene"
-          completions: ['delete'] #@todo needed?
+          completions: ['delete']
           details: """
     delete
     -----
@@ -389,7 +395,7 @@ Add the `focus` task.
 
         @ookonsole.addTask 'focus',
           summary: "Focus on one of the magnubbins"
-          completions: ['focus '] #@todo needed?
+          completions: ['focus ']
           details: """
     focus
     -----
@@ -416,7 +422,7 @@ Add the `blur` task.
 
         @ookonsole.addTask 'blur',
           summary: "Focus on the camera"
-          completions: ['blur'] #@todo needed?
+          completions: ['blur']
           details: """
     blur
     -----
@@ -479,7 +485,7 @@ Add the `reset` task.
 
         @ookonsole.addTask 'reset',
           summary: "Reset the focused Item.Mesh, or the camera"
-          completions: ['reset'] #@todo needed?
+          completions: ['reset']
           details: """
     reset
     -----
@@ -507,7 +513,7 @@ Add the `save` task.
 
         @ookonsole.addTask 'save',
           summary: "Convert the scene into an Nwang string"
-          completions: ['save ', 'save prefix '] #@todo needed?
+          completions: ['save ', 'save prefix ']
           details: """
     save
     -----
@@ -521,10 +527,10 @@ Add the `save` task.
 Generate the save-string. 
 
             out = ''
-            out += 'c' + context.oo3d.read(context.cameraI, 'nwang') + ';'
+            out += context.oo3d.read(context.cameraI, 'nwang').slice(-9) + ';'
             for instance in context.oo3d._all
-              if 'Item.Mesh' == instance?.C
-                out += context.oo3d.read(instance.index, 'nwang') + ';'
+              if 'Item.Mesh' == instance?.C #@todo `oo3d.each('Item.Mesh', ...)`
+                out += context.oo3d.read(instance.index, 'nwang').slice(-11) + ';'
             out = out.slice 0, -1
 
 Add a prefix if required. 
@@ -542,6 +548,47 @@ Invoke a browser prompt if required.
               prompt 'Save:', out
 
             "Save: #{out}"
+
+
+
+
+Add the `restore` task. 
+
+        @ookonsole.addTask 'restore',
+          summary: "Replace the current scene with an Nwang-defined scene"
+          completions: ['restore ']
+          details: """
+    restore
+    -------
+    @todo describe. 
+
+    @todo usage
+
+    """
+          runner: (context, options) ->
+
+Parse the restore-string. 
+
+            if ! options[0] then return "
+              no restore-string provided"
+
+            #@todo delete all preexisting meshes
+
+            #sf3 = context.oo3d.nwang.sf3
+            oo3d = context.oo3d
+            items = options[0].split ';'
+
+            camera = items.shift()
+            oo3d.edit context.cameraI, camera
+            oo3d._all[context.cameraI].updateCamera()
+
+            for item in items
+              index = oo3d.add 'Item.Mesh'
+              oo3d.edit index, item
+              oo3d._all[context.rendererI].meshes.push oo3d._all[index]
+            oo3d.render() #@todo remove when animation loop is done
+
+            "Restored #{items.length} mesh#{if 1 == items.length then '' else 'es'}"
 
 
 
@@ -606,7 +653,8 @@ Init the scene Add button.
 Init the scene Save button. 
 
         $('#grid9-scene-save').addEventListener 'mousedown', (event) =>
-          @ookonsole.execute 'save prompt prefix http://magnubbin.loop.coop/?'
+          baseURL = window.location.protocol + '//' + window.location.pathname
+          @ookonsole.execute "save prompt prefix #{baseURL}?scene_v1="
 
 Init the scene Reset button. 
 
@@ -1360,6 +1408,22 @@ Reset Magnubbin state.
       sX: scale
       sY: scale
       sZ: scale
+
+
+
+
+#### `parseQuery()`
+- `query <string>`  eg from `window.location.search.slice 1`
+
+Based on a [Stack Overflow answer](http://stackoverflow.com/a/2880929). 
+
+    parseQuery = (query) ->
+      search = /([^&=]+)=?([^&]*)/g
+      decode = (s) -> decodeURIComponent s.replace(/\+/g, ' ')
+      obj = {}
+      while (match = search.exec query)
+        obj[decode match[1]] = decode match[2]
+      obj
 
 
 
