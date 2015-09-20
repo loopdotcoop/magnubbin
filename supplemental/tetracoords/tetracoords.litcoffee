@@ -11,7 +11,7 @@ tetraCoords()
 
 To watch and compile automatically: 
 ```bash
-coffee --watch --compile tetracoords.litcoffee
+coffee --watch --compile supplemental/tetracoords/tetracoords.litcoffee
 ```
 
 
@@ -23,6 +23,7 @@ coffee --watch --compile tetracoords.litcoffee
 - `e <number>`  the edge joining __J — H__
 - `f <number>`  the edge joining __J — I__
 - `<array>`     twelve numbers, representing (x,y,z) coords of __G, H, I and J__
+
 
     window.tetraCoords = (a, b, c, d, e, f) ->
       M = 'tetraCoords()\n  '
@@ -45,7 +46,7 @@ furthest away from you) at the origin.
       ]
 
 Use the [law of cosines](https://goo.gl/8djIju) to find the angle (in radians) 
-of the corner opposite `b` on the tabletop. `cos B = (a² + c² − b²) / 2ac
+of the corner opposite `b` on the tabletop. `cos B = (a² + c² − b²) / 2ac`  
 
       oppB = Math.acos( (a*a + c*c - b*b) / (2*a*c) )
 
@@ -78,8 +79,6 @@ Deal with an impossible tetrahedron.
       if null == result then throw RangeError "
         #{M}`#{a},#{b},#{c},#{d},#{e},#{f}` cannot be tetrahedron edges"
 
-      console.log result, typeof result
-
 `trilaterate()` usually returns coords for __J__ above _and_ below the tabletop. 
 
       if 2 == result.length
@@ -109,7 +108,7 @@ Round results to 3 decimal places.
 
       out = (Math.round(coord * 1000) / 1000 for coord in out)
 
-Convert to a neat string. @todo pass an argument to enable this
+Convert to a neat string. @todo pass tetraCoords()` an argument to enable this
 
       out = (for coord in out
         coord  = (if 0 <= coord then ' ' else '') + coord

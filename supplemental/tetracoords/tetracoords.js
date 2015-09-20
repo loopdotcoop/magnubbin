@@ -43,7 +43,6 @@
     if (null === result) {
       throw RangeError(M + "`" + a + "," + b + "," + c + "," + d + "," + e + "," + f + "` cannot be tetrahedron edges");
     }
-    console.log(result, typeof result);
     if (2 === result.length) {
       out.push(result[1].x, result[1].y, result[1].z);
     } else {
