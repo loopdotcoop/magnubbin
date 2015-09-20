@@ -116,42 +116,168 @@ Instantiate and configure the 3D engine.
 
 Load position and color Buffers. 
 
-          @pyramidPositionI = @oo3d.add('Buffer.Position', { data:[
-            # front face
-             0.0,  1.0,  0.0,
-            -1.0, -1.0,  1.0,
-             1.0, -1.0,  1.0,
-            # right face
-             0.0,  1.0,  0.0,
-             1.0, -1.0,  1.0,
-             1.0, -1.0, -1.0,
-            # back face
-             0.0,  1.0,  0.0,
-             1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0,
-            # left face
-             0.0,  1.0,  0.0,
-            -1.0, -1.0, -1.0,
-            -1.0, -1.0,  1.0
+          @flatrPositionI = @oo3d.add('Buffer.Position', { data:[
+            # flatr tabletop face
+             0.000, -0.330,  1.732 # G
+            -2.000, -0.330, -1.732 # H
+             2.000, -0.330, -1.732 # I
+            # flatr distant-left face
+             0.000, -0.330,  1.732 # G
+            -2.000, -0.330, -1.732 # H
+             0.000,  0.660,  1.588 # J
+            # flatr distant-right face
+             0.000, -0.330,  1.732 # G
+             2.000, -0.330, -1.732 # I
+             0.000,  0.660,  1.588 # J
+            # flatr near face
+            -2.000, -0.330, -1.732 # H
+             2.000, -0.330, -1.732 # I
+             0.000,  0.660,  1.588 # J
+          ]})
+          @betrPositionI = @oo3d.add('Buffer.Position', { data:[
+            # betr tabletop face
+             0.000, -0.471,  2.135 # G
+            -1.265, -0.471, -1.660 # H
+             1.581, -0.471, -2.609 # I
+            # betr distant-left face
+             0.000, -0.471,  2.135 # G
+            -1.265, -0.471, -1.660 # H
+            -0.119,  0.942,  0.725 # J
+            # betr distant-right face
+             0.000, -0.471,  2.135 # G
+             1.581, -0.471, -2.609 # I
+            -0.119,  0.942,  0.725 # J
+            # betr near face
+            -1.265, -0.471, -1.660 # H
+             1.581, -0.471, -2.609 # I
+            -0.119,  0.942,  0.725 # J
+          ]})
+          @ocrexPositionI = @oo3d.add('Buffer.Position', { data:[
+            # ocrex tabletop face
+             0.000, -0.756,  2.291 # G
+            -2.000, -0.756, -2.291 # H
+             2.000, -0.756, -2.291 # I
+            # ocrex distant-left face
+             0.000, -0.756,  2.291 # G
+            -2.000, -0.756, -2.291 # H
+             0.000,  1.512,  0.327 # J
+            # ocrex distant-right face
+             0.000, -0.756,  2.291 # G
+             2.000, -0.756, -2.291 # I
+             0.000,  1.512,  0.327 # J
+            # ocrex near face
+            -2.000, -0.756, -2.291 # H
+             2.000, -0.756, -2.291 # I
+             0.000,  1.512,  0.327 # J
+          ]})
+          @icosPositionI = @oo3d.add('Buffer.Position', { data:[
+            # icos tabletop face
+             0.000, -0.744,  2.291 # G
+            -2.000, -0.744, -2.291 # H
+             2.000, -0.744, -2.291 # I
+            # icos distant-left face
+             0.000, -0.744,  2.291 # G
+            -2.000, -0.744, -2.291 # H
+             0.000,  1.489, -2.182 # J
+            # icos distant-right face
+             0.000, -0.744,  2.291 # G
+             2.000, -0.744, -2.291 # I
+             0.000,  1.489, -2.182 # J
+            # icos near face
+            -2.000, -0.744, -2.291 # H
+             2.000, -0.744, -2.291 # I
+             0.000,  1.489, -2.182 # J
+          ]})
+          @decrPositionI = @oo3d.add('Buffer.Position', { data:[
+            # decr tabletop face
+             0.000, -0.634,  3.083 # G
+            -1.581, -0.634, -1.660 # H
+             2.530, -0.634, -4.506 # I
+            # decr distant-left face
+             0.000, -0.634,  3.083 # G
+            -1.581, -0.634, -1.660 # H
+             0.731,  1.269, -1.482 # J
+            # decr distant-right face
+             0.000, -0.634,  3.083 # G
+             2.530, -0.634, -4.506 # I
+             0.731,  1.269, -1.482 # J
+            # decr near face
+            -1.581, -0.634, -1.660 # H
+             2.530, -0.634, -4.506 # I
+             0.731,  1.269, -1.482 # J
+          ]})
+          @sqishPositionI = @oo3d.add('Buffer.Position', { data:[
+            # sqish tabletop face
+             0.000, -0.485,  3.303 # G
+            -1.984, -0.485, -2.359 # H
+             2.646, -0.485, -4.247 # I
+            # sqish distant-left face
+             0.000, -0.485,  3.303 # G
+            -1.984, -0.485, -2.359 # H
+            -0.220,  0.970, -0.417 # J
+            # sqish distant-right face
+             0.000, -0.485,  3.303 # G
+             2.646, -0.485, -4.247 # I
+            -0.220,  0.970, -0.417 # J
+            # sqish near face
+            -1.984, -0.485, -2.359 # H
+             2.646, -0.485, -4.247 # I
+            -0.220,  0.970, -0.417 # J
+          ]})
+          @slysPositionI = @oo3d.add('Buffer.Position', { data:[
+            # slys tabletop face
+             0.000, -0.678,  3.992 # G
+            -0.500, -0.678, -3.992 # H
+             0.500, -0.678, -3.992 # I
+            # slys distant-left face
+             0.000, -0.678,  3.992 # G
+            -0.500, -0.678, -3.992 # H
+             0.000,  1.356,  0.548 # J
+            # slys distant-right face
+             0.000, -0.678,  3.992 # G
+             0.500, -0.678, -3.992 # I
+             0.000,  1.356,  0.548 # J
+            # slys near face
+            -0.500, -0.678, -3.992 # H
+             0.500, -0.678, -3.992 # I
+             0.000,  1.356,  0.548 # J
+          ]})
+          @spykPositionI = @oo3d.add('Buffer.Position', { data:[
+            # spyk tabletop face
+             0.000, -0.288,  3.992 # G
+            -0.500, -0.288, -3.992 # H
+             0.500, -0.288, -3.992 # I
+            # spyk distant-left face
+             0.000, -0.288,  3.992 # G
+            -0.500, -0.288, -3.992 # H
+             0.000,  0.577, -3.961 # J
+            # spyk distant-right face
+             0.000, -0.288,  3.992 # G
+             0.500, -0.288, -3.992 # I
+             0.000,  0.577, -3.961 # J
+            # spyk near face
+            -0.500, -0.288, -3.992 # H
+             0.500, -0.288, -3.992 # I
+             0.000,  0.577, -3.961 # J
           ]})
 
-          @pyramidColorI = @oo3d.add('Buffer.Color', { data:[
+          @genericColorI = @oo3d.add('Buffer.Color', { data:[
             # Front face
-             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
-             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
-             0.3,   0.0,  0.0,  0.95, # near-opaque dark red
+             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
+             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
+             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
             # Right face
-             0.0,  0.25,  0.0,  0.75, # translucent lime
-             0.0,  0.25,  0.0,  0.75, # translucent lime
-             0.0,  0.25,  0.0,  0.75, # translucent lime
+             0.0,  0.25,  0.0,  0.75 # translucent lime
+             0.0,  0.25,  0.0,  0.75 # translucent lime
+             0.0,  0.25,  0.0,  0.75 # translucent lime
             # Back face
-             1.0,  0.25,  0.0,  0.10, # translucent orange
-             1.0,  0.25,  0.0,  0.10, # translucent orange
-             1.0,  0.25,  0.0,  0.10, # translucent orange
+             1.0,  0.25,  0.0,  0.10 # translucent orange
+             1.0,  0.25,  0.0,  0.10 # translucent orange
+             1.0,  0.25,  0.0,  0.10 # translucent orange
             # Left face
-             0.25,  0.5,  1.0,  0.05, # translucent light cyan
-             0.25,  0.5,  1.0,  0.05, # translucent light cyan
-             0.25,  0.5,  1.0,  0.05  # translucent light cyan
+             0.25,  0.5,  1.0,  0.05 # translucent light cyan
+             0.25,  0.5,  1.0,  0.05 # translucent light cyan
+             0.25,  0.5,  1.0,  0.05 # translucent light cyan
           ]})
 
 Create camera, program, renderer and layer. 
@@ -214,24 +340,23 @@ Add the `add` task.
     """
           runner: (context, options) ->
             oo3d = context.oo3d
-            switch options[0]
-              when 'ocrex'
-                index = oo3d.add('Item.Mesh',
-                  positionI:  context.pyramidPositionI
-                  colorI:     context.pyramidColorI
-                )
-                oo3d._all[context.rendererI].meshes.push(
-                  oo3d._all[index]
-                )
-                context.changeFocus index
-                oo3d.render() #@todo remove when animation loop is done
-                $('.magnubbin-focus-presets').innerHTML += """
-                  <li id="magnubbin-focus-preset-#{index}" 
-                  data-command="focus #{index}">Ocrex##{index}</li>"""
-                context.initPresets()
-                "Added ocrex. Focused on index #{index}"
-              else
-                "'#{options[0]}' not recognised"
+            valid = ['flatr','betr','ocrex','icos','decr','sqish','slys','spyk']
+            if -1 == valid.indexOf options[0] then return "
+              Buffer.Position '#{options[0]}' not recognised"
+
+            index = oo3d.add('Item.Mesh',
+              positionI:  context[options[0] + 'PositionI']
+              colorI:     context.genericColorI
+            )
+            oo3d.edit index, { sX:0.25, sY:0.25, sZ:0.25 }
+            oo3d._all[context.rendererI].meshes.push oo3d._all[index]
+            context.changeFocus index
+            oo3d.render() #@todo remove when animation loop is done
+            $('.magnubbin-focus-presets').innerHTML += """
+              <li id="magnubbin-focus-preset-#{index}" 
+              data-command="focus #{index}">#{options[0]}##{index}</li>"""
+            context.initPresets()
+            "Added #{options[0]}. Focused on index #{index}"
 
 
 
@@ -366,6 +491,7 @@ Add the `reset` task.
           runner: (context, options) ->
             if context.focusI
               context.oo3d.edit context.focusI, 'reset'
+              context.oo3d.edit context.focusI, { sX:0.25, sY:0.25, sZ:0.25 }
               context.oo3d.render()
               "Reset index '#{context.focusI}'"
             else
@@ -480,8 +606,7 @@ Init the scene Add button.
 Init the scene Save button. 
 
         $('#grid9-scene-save').addEventListener 'mousedown', (event) =>
-          #@ookonsole.execute 'save prompt prefix http://magnubbin.loop.coop/?'
-          @ookonsole.execute 'save prompt prefix file:///Volumes/ldc/2015-Work/2015-Loop.Coop/Magnubbin/magnubbin/index.html?'
+          @ookonsole.execute 'save prompt prefix http://magnubbin.loop.coop/?'
 
 Init the scene Reset button. 
 
@@ -516,8 +641,14 @@ Init the add Back button.
 Init the add mesh buttons. 
 
         meshNames =
-          'grid9-add-shape-0': 'ocrex'
-          'grid9-add-shape-1': 'slyce'
+          'grid9-add-shape-0': 'flatr'
+          'grid9-add-shape-1': 'betr'
+          'grid9-add-shape-2': 'ocrex'
+          'grid9-add-shape-3': 'icos'
+          'grid9-add-shape-4': 'decr'
+          'grid9-add-shape-5': 'sqish'
+          'grid9-add-shape-6': 'slys'
+          'grid9-add-shape-7': 'spyk'
         for id,meshName of meshNames
           main = @
           ((id,meshName)-> # capture each id/meshName pair in a closure
@@ -940,14 +1071,14 @@ Inject HTML elements for the basic Magnubbin framework.
             <!-- The Add Grid9 appears when the 'Add' button is clicked -->
             <ul id="grid9-add" class="grid9">
               <li id="grid9-add-back"    class="grid9-left   grid9-top"   ><b>Back</b><i>&lt;</i></li>
-              <li id="grid9-add-shape-0" class="grid9-center grid9-top"   ><b>Add</b><i>0</i></li>
-              <li id="grid9-add-shape-1" class="grid9-right  grid9-top"   ><b>Add</b><i>1</i></li>
-              <li id="grid9-add-shape-2" class="grid9-left   grid9-middle"><b>Add</b><i>2</i></li>
-              <li id="grid9-add-shape-3" class="grid9-center grid9-middle"><b>Add</b><i>3</i></li>
-              <li id="grid9-add-shape-4" class="grid9-right  grid9-middle"><b>Add</b><i>4</i></li>
-              <li id="grid9-add-shape-5" class="grid9-left   grid9-bottom"><b>Add</b><i>5</i></li>
-              <li id="grid9-add-shape-6" class="grid9-center grid9-bottom"><b>Add</b><i>6</i></li>
-              <li id="grid9-add-shape-7" class="grid9-right  grid9-bottom"><b>Add</b><i>7</i></li>
+              <li id="grid9-add-shape-0" class="grid9-center grid9-top"   ><b>Add</b><i>Flatr</i></li>
+              <li id="grid9-add-shape-1" class="grid9-right  grid9-top"   ><b>Add</b><i>Betr</i></li>
+              <li id="grid9-add-shape-2" class="grid9-left   grid9-middle"><b>Add</b><i>Ocrex</i></li>
+              <li id="grid9-add-shape-3" class="grid9-center grid9-middle"><b>Add</b><i>Icos</i></li>
+              <li id="grid9-add-shape-4" class="grid9-right  grid9-middle"><b>Add</b><i>Decr</i></li>
+              <li id="grid9-add-shape-5" class="grid9-left   grid9-bottom"><b>Add</b><i>Sqish</i></li>
+              <li id="grid9-add-shape-6" class="grid9-center grid9-bottom"><b>Add</b><i>Slys</i></li>
+              <li id="grid9-add-shape-7" class="grid9-right  grid9-bottom"><b>Add</b><i>Spyk</i></li>
             </ul>
 
             <!-- The Mesh Grid9 appears when a mesh in the 3D scene is clicked -->
@@ -979,7 +1110,14 @@ Inject HTML elements for the basic Magnubbin framework.
             </a>
             <ul class="magnubbin-presets">
               <li data-command="clear">Clear</li>
+              <li data-command="add flatr">Add Flatr</li>
+              <li data-command="add betr" >Add Betr</li>
               <li data-command="add ocrex">Add Ocrex</li>
+              <li data-command="add icos" >Add Icos</li>
+              <li data-command="add decr" >Add Decr</li>
+              <li data-command="add sqish">Add Sqish</li>
+              <li data-command="add slys" >Add Slys</li>
+              <li data-command="add spyk" >Add Spyk</li>
             </ul>
             <ul class="magnubbin-presets">
               <li data-command="edit drx -20">rx-</li>

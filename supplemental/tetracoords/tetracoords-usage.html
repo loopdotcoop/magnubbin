@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Using tetraCoords()</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="tetracoords.js"></script>
+  <script src="trilateration.js"></script>
+  <script>
+    addEventListener('load', function () {
+      try {
+        var
+
+          //// Micro jQuery. 
+          $ = document.querySelector.bind(document)
+
+
+          //// DOM Elements. 
+         ,$main  = $('#main')
+         ,$error = $('#error')
+
+
+          //// Basic tests. 
+         ,flatr = tetraCoords(4, 4, 4, 1, 4, 4)
+         ,betr  = tetraCoords(4, 3, 5, 2, 3, 4)
+         ,ocrex = tetraCoords(5, 4, 5, 3, 4, 4) // see below
+         ,icos  = tetraCoords(5, 4, 5, 5, 3, 3)
+         ,decr  = tetraCoords(5, 5, 8, 5, 3, 4)
+         ,sqish = tetraCoords(6, 5, 8, 4, 3, 5)
+         ,slys  = tetraCoords(8, 1, 8, 4, 5, 5)
+         ,spyk  = tetraCoords(8, 1, 8, 8, 1, 1)
+
+
+          //// `toBuffer()` renders a CoffeeScript array, to be inserted into 
+          //// magnubbin/src/class-main.litcoffee
+         ,toBuffer = function (c, name) { // `c` is the coords array returned by `tetraCoords()`
+            out = [
+              '# ' + name + ' tabletop face'
+             ,c[0] + ', ' +  c[1] + ', ' +  c[2] + ' # G'
+             ,c[3] + ', ' +  c[4] + ', ' +  c[5] + ' # H'
+             ,c[6] + ', ' +  c[7] + ', ' +  c[8] + ' # I'
+             ,'# ' + name + ' distant-left face'
+             ,c[0] + ', ' +  c[1] + ', ' +  c[2] + ' # G'
+             ,c[3] + ', ' +  c[4] + ', ' +  c[5] + ' # H'
+             ,c[9] + ', ' + c[10] + ', ' + c[11] + ' # J'
+             ,'# ' + name + ' distant-right face'
+             ,c[0] + ', ' +  c[1] + ', ' +  c[2] + ' # G'
+             ,c[6] + ', ' +  c[7] + ', ' +  c[8] + ' # I'
+             ,c[9] + ', ' + c[10] + ', ' + c[11] + ' # J'
+             ,'# ' + name + ' near face'
+             ,c[3] + ', ' +  c[4] + ', ' +  c[5] + ' # H'
+             ,c[6] + ', ' +  c[7] + ', ' +  c[8] + ' # I'
+             ,c[9] + ', ' + c[10] + ', ' + c[11] + ' # J'
+            ];
+            return out.join('\n');
+          }
+        ;
+
+
+        //// Remove the "Loading..." message, and display the CoffeeScript arrays. 
+        $main.innerHTML = 'Using tetraCoords()\n===================\n\n';
+        $main.innerHTML += toBuffer(flatr,'flatr') + '\n\n';
+        $main.innerHTML += toBuffer(betr, 'betr' ) + '\n\n';
+        $main.innerHTML += toBuffer(ocrex,'ocrex') + '\n\n';
+        $main.innerHTML += toBuffer(icos, 'icos' ) + '\n\n';
+        $main.innerHTML += toBuffer(decr, 'decr' ) + '\n\n';
+        $main.innerHTML += toBuffer(sqish,'sqish') + '\n\n';
+        $main.innerHTML += toBuffer(slys, 'slys' ) + '\n\n';
+        $main.innerHTML += toBuffer(spyk, 'spyk' ) + '\n\n';
+
+
+      //// Handle exceptions. 
+      } catch (error) {
+        console.log(error);
+        $error.innerHTML = error;
+        $error.className = ''; // remove '.hidden'
+      }
+
+    });
+  </script>
+  <style>
+
+    /* PAGE LAYOUT AND MAIN OUTPUT */
+    body {
+      background: #ccc;
+    }
+    #main {
+      font: bold 10px/14px "Monaco", monospace;
+    }
+
+
+    /* ERROR */
+    #error {
+      position: absolute;
+      box-sizing: border-box;
+      bottom:  0;
+      left:    5%;
+      width:  90%;
+      padding: 1rem;
+      font-family: monaco, monospace;
+      white-space: pre;
+      background-color: #933;
+      color: #fff;
+      transition: all 0.5s;
+      opacity: 1;
+      z-index: 15;
+    }
+    #error.hidden {
+      padding-bottom: 0;
+      opacity: 0;
+    }
+
+  </style>
+</head>
+<body>
+  <pre id="main">Loading...</pre>
+  <div id="error" class="hidden"></div>
+</body>
+</html>
