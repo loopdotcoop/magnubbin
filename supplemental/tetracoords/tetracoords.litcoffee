@@ -22,8 +22,7 @@ coffee --watch --compile supplemental/tetracoords/tetracoords.litcoffee
 - `d <number>`  the edge joining __G — J__
 - `e <number>`  the edge joining __J — H__
 - `f <number>`  the edge joining __J — I__
-- `<array>`     twelve numbers, representing (x,y,z) coords of __G, H, I and J__
-
+- `<array>`     twelve numbers, representing (x,y,z) coords of __G, H, I and J__  
 
     window.tetraCoords = (a, b, c, d, e, f) ->
       M = 'tetraCoords()\n  '
