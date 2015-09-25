@@ -844,6 +844,9 @@ Xx. @todo describe
         html, body {
           overflow: hidden;
         }
+        a img:active {
+          outline: none;
+        }
 
 
         /* MAIN SECTIONS */
@@ -987,7 +990,9 @@ Xx. @todo describe
         .magnubbin-preexisting {
           left:      -101%;
           width:      100%;
-          background:   rgba(0,0,0,0.9);
+          background: rgba(0,0,0,0.9) url(build/asset/magnubbin-info-bkgnd.png) center center;
+          background-size: cover;
+          text-align: center;
           opacity:      0;
           transition:   all 0.3s;
         }
@@ -996,7 +1001,83 @@ Xx. @todo describe
           opacity: 1;
         }
         .magnubbin-preexisting h1 {
+          display: none;
           margin-top: 2.5rem;
+        }
+        a[title="Visit the Loop.Coop homepage"] {
+          display: block;
+          margin-top: 8rem;
+        }
+        a[title="Refresh Magnubbin"] {
+          display: block;
+        }
+        .magnubbin-preexisting h4 {
+          font-size: 1.5em;
+          text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black
+        }
+        .magnubbin-preexisting h5 strong {
+          display: inline-block;
+          padding: 0.5em 1em 0.4em 1em;
+          font-size: 2em;
+          background-color: rgba(0,0,0,0.7);
+          border: 2px solid;
+          border-radius: 0.2em;
+          cursor: pointer;
+          transition: all 0.5s;
+        }
+        .magnubbin-preexisting h5 strong:hover {
+          color: #0f3;
+        }
+        .magnubbin-preexisting ol {
+          display: inline-block;
+          padding: 1rem 1rem 1rem 3rem;
+          text-align: left; 
+          background-color: rgba(0,0,0,0.7);
+          border: 2px solid;
+          border-radius: 0.2em;
+        }
+        a[title="GitHub"] {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0.5rem;
+        }
+        @media only screen and (max-width: 830px) {
+          a[title="Visit the Loop.Coop homepage"] {
+            margin-top: 5rem;
+          }
+          a[title="Visit the Loop.Coop homepage"] img {
+            width: 38%;
+            height: auto;
+          }
+          a[title="Refresh Magnubbin"] img {
+            width: 80%;
+            height: auto;
+          }
+        }
+        @media only screen and (max-height: 850px) {
+          a[title="Visit the Loop.Coop homepage"] {
+            margin-top: 5rem;
+          }
+        }
+        @media only screen and (max-height: 800px) {
+          a[title="Visit the Loop.Coop homepage"] {
+            margin-top: 2rem;
+          }
+          .magnubbin-preexisting ol {
+            padding: 0.6rem 0.6rem 0.6rem 2rem;
+            font-size: 0.8em;
+          }
+        }
+        @media only screen and (max-height: 680px) {
+          .magnubbin-preexisting ol {
+            display: none;
+          }
+        }
+        @media only screen and (max-height: 450px) {
+          a[title="GitHub"] {
+            display: none;
+          }
         }
 
 
@@ -1327,6 +1408,13 @@ The ‘command’ icon toggles display of the command-line interface.
           $('.magnubbin-icon-info').className    = 'magnubbin-icon-info'
           grid9OnlyShow()
           $('#ookonsole-command').focus()
+
+The ‘Get Started’ button hides the preexisting HTML. 
+
+      $('.magnubbin-preexisting h5 strong').addEventListener 'click', ->
+        $('.magnubbin-preexisting').className = 'magnubbin-preexisting'
+        $('.magnubbin-icon-info').className   = 'magnubbin-icon-info'
+        grid9OnlyShow()
 
 
 
