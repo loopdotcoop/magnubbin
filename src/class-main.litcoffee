@@ -1238,6 +1238,24 @@ Xx. @todo describe
           font-style: normal;
         }
 
+        #grid9-add-shape-0 {
+          background-image: url(build/asset/add-icon-flatr.png); }
+        #grid9-add-shape-1 {
+          background-image: url(build/asset/add-icon-betr.png); }
+        #grid9-add-shape-2 {
+          background-image: url(build/asset/add-icon-ocrex.png); }
+        #grid9-add-shape-3 {
+          background-image: url(build/asset/add-icon-icos.png); }
+        #grid9-add-shape-4 {
+          background-image: url(build/asset/add-icon-decr.png); }
+        #grid9-add-shape-5 {
+          background-image: url(build/asset/add-icon-sqish.png); }
+        #grid9-add-shape-6 {
+          background-image: url(build/asset/add-icon-slys.png); }
+        #grid9-add-shape-7 {
+          background-image: url(build/asset/add-icon-spyk.png); }
+
+
       """
 
 
@@ -1285,14 +1303,14 @@ Inject HTML elements for the basic Magnubbin framework.
             <!-- The Add Grid9 appears when the 'Add' button is clicked -->
             <ul id="grid9-add" class="grid9">
               <li id="grid9-add-back"    class="grid9-left   grid9-top"   ><b>Back</b><i>&lt;</i></li>
-              <li id="grid9-add-shape-0" class="grid9-center grid9-top"   ><b>Add</b><i>Flatr</i></li>
-              <li id="grid9-add-shape-1" class="grid9-right  grid9-top"   ><b>Add</b><i>Betr</i></li>
-              <li id="grid9-add-shape-2" class="grid9-left   grid9-middle"><b>Add</b><i>Ocrex</i></li>
-              <li id="grid9-add-shape-3" class="grid9-center grid9-middle"><b>Add</b><i>Icos</i></li>
-              <li id="grid9-add-shape-4" class="grid9-right  grid9-middle"><b>Add</b><i>Decr</i></li>
-              <li id="grid9-add-shape-5" class="grid9-left   grid9-bottom"><b>Add</b><i>Sqish</i></li>
-              <li id="grid9-add-shape-6" class="grid9-center grid9-bottom"><b>Add</b><i>Slys</i></li>
-              <li id="grid9-add-shape-7" class="grid9-right  grid9-bottom"><b>Add</b><i>Spyk</i></li>
+              <li id="grid9-add-shape-0" class="grid9-center grid9-top"   ><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-1" class="grid9-right  grid9-top"   ><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-2" class="grid9-left   grid9-middle"><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-3" class="grid9-center grid9-middle"><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-4" class="grid9-right  grid9-middle"><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-5" class="grid9-left   grid9-bottom"><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-6" class="grid9-center grid9-bottom"><b>Add</b><i></i></li>
+              <li id="grid9-add-shape-7" class="grid9-right  grid9-bottom"><b>Add</b><i></i></li>
             </ul>
 
             <!-- The Mesh Grid9 appears when a mesh in the 3D scene is clicked -->
