@@ -318,7 +318,11 @@ Deal with 3d engine init errors.
 #### Display a scene, if provided by the `scene_v1` query-string. 
 
         query = parseQuery window.location.search.slice 1
-        if query.scene_v1 then @ookonsole.execute 'restore ' + query.scene_v1
+        if query.scene_v1
+          @ookonsole.execute 'restore ' + query.scene_v1
+        else
+          $('.magnubbin-preexisting').className = 'magnubbin-preexisting active'
+          $('.magnubbin-icon-info').className   = 'magnubbin-icon-info active'
 
 
 #### Enable preset buttons and click/drag on the 3d scene. 
@@ -602,6 +606,7 @@ Methods
 Xx. @todo describe
 
       initPresets: ->
+        return #@todo perhaps reinstate presets in a later version?
         @$$presets = $$ '.magnubbin-presets >li'
         for $preset in @$$presets
           $preset.removeEventListener 'click', onPresetClick #@todo is this needed?
@@ -641,6 +646,17 @@ Focus on the Item.Mesh. Or if the background was clicked, focus on the camera.
             @ookonsole.execute 'blur'
           else
             @ookonsole.execute 'focus ' + meshI
+
+Hide other panels. 
+
+          $preexisting = $ '.magnubbin-preexisting'
+          $icon        = $ '.magnubbin-icon-info'
+          $control     = $ '.magnubbin-control'
+          $icon        = $ '.magnubbin-icon-control'
+          $preexisting.className = 'magnubbin-preexisting'
+          $icon.className        = 'magnubbin-icon-info'
+          $control.className     = 'magnubbin-control'
+          $icon.className        = 'magnubbin-icon-control'
 
 
 ##### Grid9 Scene
@@ -824,9 +840,15 @@ Xx. @todo describe
         /* #{title} */
 
 
+        /* LAYOUT */
+        html, body {
+          overflow: hidden;
+        }
+
+
         /* MAIN SECTIONS */
         .magnubbin-main {
-          color: #acb;
+          color: #9fc;
         }
         .magnubbin-main >* {
           position: absolute;
@@ -841,34 +863,112 @@ Xx. @todo describe
           padding: 0;
           background: transparent; /* was rgba(30,50,40,0.7) */
         }
-        .magnubbin-control {
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          right:  0;
-          width:  25%;
-          height: 100%;
-          min-width: 35rem; /* usual maximum ookonsole-display lines */
-          background: rgba(30,30,30,0.7);
+
+
+        /* MIN/MAX BUTTONS */
+        .magnubbin-panel-minmax {
+          left:    0;
+          right:   0;
+          padding: 0;
+          height:  1px;
+          z-index: 20;
         }
-        .magnubbin-control >* {
-          flex-basis: 0%; /* log is '100%', so expands to fill */
+        .magnubbin-panel-minmax >a {
+          display:    block;
+          position:   relative;
+          margin:     0.6rem 1rem;
+          padding:    0;
+          width:      1em;
+          height:     1em;
+          max-width:  1em;
+          max-height: 1em;
+          border: 2px solid; /* same as text color */
+          border-radius: 2em;
+          font: bold italic 2em serif;
         }
-        .magnubbin-control h4 { /* @todo remove if not used */
-          margin: 0;
-          padding: 0.3em 0;
+        .magnubbin-icon-info:before {
+          display: inline-block;
+          position: absolute;
+          margin-left: 0.35em;
+          content: "i";
         }
-        .magnubbin-control ul,
-        .magnubbin-control pre {
-          margin-top: 0.5em;
+        .magnubbin-icon-info.active:before {
+          content: "×";
+          font-style: normal;
+          margin: -0.1em 0 0 0.22em;
         }
+        .magnubbin-icon-control:before {
+          display: inline-block;
+          position: absolute;
+          margin: -0.1em 0 0 0.25em;
+          content: "§";
+        }
+        .magnubbin-icon-control.active:before {
+          content: "×";
+          font-style: normal;
+          margin: -0.1em 0 0 0.22em;
+        }
+        .magnubbin-toggle-preexisting {
+          float: left;
+        }
+        .magnubbin-toggle-command {
+          float: right;
+        }
+
+        .magnubbin-logo {
+          display: none; /*@todo perhaps show this again */
+          font: bold 1.5em Podkova;
+        }
+        .magnubbin-control .magnubbin-logo {
+          float: right;
+        }
+
+
+        /* XX */
         .magnubbin-main a {
-          color: #eee;
+          color: #c69;
           text-decoration: none;
           transition: all 0.5s;
         }
         .magnubbin-main a:hover {
-          color: #0f3;
+          color: #f6d;
+        }
+
+        .magnubbin-control {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding:    0;
+          right:      0;
+          width:      0;
+          min-width:  0;
+          max-width:  0;
+          height:   100%;
+          background: rgba(0,0,0,0.9);
+          opacity:    0;
+          transition: all 0.3s;
+        }
+        .magnubbin-control.active {
+          padding:    1rem;
+          width:     25%;
+          min-width: 35rem; /* usual maximum ookonsole-display lines */
+          max-width: 35rem; /* usual maximum ookonsole-display lines */
+          opacity:    1;
+        }
+        .magnubbin-control >* {
+          flex-basis: 0%; /* log is '100%', so expands to fill */
+        }
+        .magnubbin-control h2 {
+          margin: 0;
+          padding: 0.3em 0;
+        }
+        .magnubbin-control h2 tt {
+          color: #eee;
+          font: bold 1em monaco, monospace;
+        }
+        .magnubbin-control ul,
+        .magnubbin-control pre {
+          margin-top: 0.5em;
         }
 
 
@@ -885,50 +985,24 @@ Xx. @todo describe
 
         /* INFO PANEL */
         .magnubbin-preexisting {
-          left:   -76%;
-          width:  75%;
-          background: rgba(10,10,10,0);
-          transition: all 1s;
+          left:      -101%;
+          width:      100%;
+          background:   rgba(0,0,0,0.9);
+          opacity:      0;
+          transition:   all 0.3s;
         }
         .magnubbin-preexisting.active {
-          left:   0;
-          background: rgba(10,10,10,1);
+          left:    0;
+          opacity: 1;
         }
-
-
-        /* TOGGLE */
-        .magnubbin-toggle-preexisting {
-          display: block;
-          height: 3em;
-          margin: 0 0 0.3em 0;
-        }
-        .magnubbin-icon-info {
-          display: block;
-          float: left;
-          margin: -0.2em 0 0.2em 0;
-          padding: 0;
-          width:      1em;
-          height:     1em;
-          max-width:  1em;
-          max-height: 1em;
-          border: 2px solid; /* same as text color */
-          border-radius: 2em;
-          font: bold italic 2em serif;
-        }
-        .magnubbin-icon-info:before {
-          content: "i";
-          display: inline-block;
-          margin-left: 0.35em;
-        }
-        .magnubbin-logo {
-          font: bold 1.5em Podkova;
-        }
-        .magnubbin-control .magnubbin-logo {
-          float: right;
+        .magnubbin-preexisting h1 {
+          margin-top: 2.5rem;
         }
 
 
         /* PRESETS */
+        /*@todo perhaps reinstate presets in a later version? */
+        /*
         ul.magnubbin-presets {
           clear: both;
           margin: 0 0 0.2em 0;
@@ -941,34 +1015,43 @@ Xx. @todo describe
           list-style-type: none;
           border: 2px solid;
           border-radius: 0.2em;
-          color: #eee;
+          color: #9fc;
           cursor: pointer;
           transition: all 0.5s;
         }
         .magnubbin-presets >li:hover {
           color: #0f3;
         }
+        */
 
 
         /* DISPLAY AND COMMAND */
         .magnubbin-control #ookonsole-display {
           flex-basis: 100%; /* override 1px */
           margin: 0;
-          padding: 0.75em 0.8em;
-          border: 2px solid;
+          padding: 0;
+          border-width: 0;
           border-radius: 0.4em 0.4em 0 0;
           font: 0.75rem "monaco", monospace;
+        }
+        .magnubbin-control.active #ookonsole-display {
+          padding: 0.75em 0.8em;
+          border: 2px solid;
         }
         #ookonsole-command {
           display: block;
           box-sizing: border-box;
-          padding: 0.5em;
           width: 100%;
-          border: 2px solid #acb;
+          padding: 0;
+          border-width: 0;
           border-radius: 0 0 0.4em 0.4em;
           font: 1em "monaco", monospace;
           color: #eee;
           background: transparent;
+        }
+        .magnubbin-control.active #ookonsole-command {
+          padding: 0.5em;
+          border: 2px solid #9fc;
         }
 
 
@@ -992,8 +1075,12 @@ Xx. @todo describe
         }
 
         /* GRID9 */
-        .magnubbin-grid {
-
+        .magnubbin-grid9 {
+          opacity: 1;
+          transition: all 0.3s;
+        }
+        .magnubbin-grid9.active {
+          opacity: 0.4;
         }
         .grid9 {
           position:    fixed;
@@ -1020,8 +1107,7 @@ Xx. @todo describe
           height:      90px;
           list-style:  none;
           text-align:  center;
-          color: #ccc;
-          background:  rgba(16,16,16,0.9);
+          background:  rgba(0,0,0,0.85);
           cursor: default;
           transition:  all 0.4s;
         }
@@ -1046,8 +1132,7 @@ Xx. @todo describe
           padding: 10px 0;
         }
         .grid9 >li >i {
-          font-family: monospace;
-          line-height: 1;
+          font: bold 1.25em/1 monaco, monospace;
         }
         .grid9-left {
           
@@ -1098,7 +1183,7 @@ Inject HTML elements for the basic Magnubbin framework.
         <main class="magnubbin-main">
           <section class="magnubbin-view">
             <canvas id="oo3d-main" width="600" height="450"></canvas><!-- @todo resize with window -->
-            <a href="http://loop.coop/" title="Created by Loop.Coop" class="magnubbin-logo">Loop.Coop</a>
+            <!--<a href="http://loop.coop/" title="Created by Loop.Coop" class="magnubbin-logo">Loop.Coop</a>-->
             <div id="magnubbin-error" class="hidden"></div>
           </section>
 
@@ -1106,14 +1191,14 @@ Inject HTML elements for the basic Magnubbin framework.
 
             <!-- The Scene Grid9 appears when the background is clicked -->
             <ul id="grid9-scene" class="grid9">
-              <li id="grid9-scene-add"    class="grid9-left   grid9-top"   ><b>Add</b ><i>+</i></li>
-              <li id="grid9-scene-save"   class="grid9-right  grid9-top"   ><b>Save</b ><i>[]</i></li>
-              <li id="grid9-scene-txy"    class="grid9-left   grid9-middle"><b>Txy</b ><i></i></li>
-              <li id="grid9-scene-scale"  class="grid9-center grid9-middle"><b>Zoom</b><i></i></li>
-              <li id="grid9-scene-txz"    class="grid9-right  grid9-middle"><b>Txz</b ><i></i></li>
-              <li id="grid9-scene-rxy"    class="grid9-left   grid9-bottom"><b>Rxy</b ><i></i></li>
-              <li id="grid9-scene-reset"  class="grid9-center grid9-bottom"><b>Reset</b><i>/</i></li>
-              <li id="grid9-scene-ryz"    class="grid9-right  grid9-bottom"><b>Ryz</b ><i></i></li>
+              <li id="grid9-scene-add"    class="grid9-left   grid9-top"   ><b>Add</b   ><i>+</i></li>
+              <li id="grid9-scene-save"   class="grid9-right  grid9-top"   ><b>Save</b  ><i>[]</i></li>
+              <li id="grid9-scene-txy"    class="grid9-left   grid9-middle"><b>Move</b  ><i>x y</i></li>
+              <li id="grid9-scene-scale"  class="grid9-center grid9-middle"><b>Zoom</b  ><i></i></li>
+              <li id="grid9-scene-txz"    class="grid9-right  grid9-middle"><b>Move</b  ><i>x z</i></li>
+              <li id="grid9-scene-rxy"    class="grid9-left   grid9-bottom"><b>Rotate</b><i>x y</i></li>
+              <li id="grid9-scene-reset"  class="grid9-center grid9-bottom"><b>Reset</b ><i>/</i></li>
+              <li id="grid9-scene-ryz"    class="grid9-right  grid9-bottom"><b>Rotate</b><i>y z</i></li>
             </ul>
 
             <!-- The Add Grid9 appears when the 'Add' button is clicked -->
@@ -1132,30 +1217,37 @@ Inject HTML elements for the basic Magnubbin framework.
             <!-- The Mesh Grid9 appears when a mesh in the 3D scene is clicked -->
             <ul id="grid9-mesh" class="grid9">
               <li id="grid9-mesh-delete" class="grid9-left   grid9-top   "><b>Delete</b><i>&times;</i></li>
-              <li id="grid9-mesh-flip"   class="grid9-right  grid9-top   "><b>Flip</b  ><i></i></li>
-              <li id="grid9-mesh-txy"    class="grid9-left   grid9-middle"><b>Txy</b   ><i></i></li>
-              <li id="grid9-mesh-txz"    class="grid9-right  grid9-middle"><b>Txz</b   ><i></i></li>
+              <li id="grid9-mesh-flip"   class="grid9-right  grid9-top   "><b>Flip</b  ><i>...</i></li>
+              <li id="grid9-mesh-txy"    class="grid9-left   grid9-middle"><b>Move</b  ><i>x y</i></li>
               <li id="grid9-mesh-scale"  class="grid9-center grid9-middle"><b>Scale</b ><i></i></li>
-              <li id="grid9-mesh-rxy"    class="grid9-left   grid9-bottom"><b>Ryx</b   ><i></i></li>
+              <li id="grid9-mesh-txz"    class="grid9-right  grid9-middle"><b>Move</b  ><i>x z</i></li>
+              <li id="grid9-mesh-rxy"    class="grid9-left   grid9-bottom"><b>Rotate</b><i>x y</i></li>
               <li id="grid9-mesh-reset"  class="grid9-center grid9-bottom"><b>Reset</b ><i>/</i></li>
-              <li id="grid9-mesh-ryz"    class="grid9-right  grid9-bottom"><b>Ryz</b   ><i></i></li>
+              <li id="grid9-mesh-ryz"    class="grid9-right  grid9-bottom"><b>Rotate</b><i>y z</i></li>
             </ul>
 
             <!-- The Flip Grid9 appears when the 'Flip' button is clicked -->
             <ul id="grid9-flip" class="grid9">
               <li id="grid9-flip-back"  class="grid9-left   grid9-top"   ><b>Back</b ><i>&lt;</i></li>
-              <li id="grid9-flip-x"     class="grid9-left   grid9-middle"><b>FlipX</b><i></i></li>
-              <li id="grid9-flip-y"     class="grid9-center grid9-middle"><b>FlipY</b><i></i></li>
-              <li id="grid9-flip-z"     class="grid9-right  grid9-middle"><b>FlipZ</b><i></i></li>
+              <li id="grid9-flip-x"     class="grid9-left   grid9-middle"><b>Flip</b><i>x</i></li>
+              <li id="grid9-flip-y"     class="grid9-center grid9-middle"><b>Flip</b><i>y</i></li>
+              <li id="grid9-flip-z"     class="grid9-right  grid9-middle"><b>Flip</b><i>z</i></li>
             </ul>
 
           </section>
 
-          <section class="magnubbin-control">
+          <section class="magnubbin-panel-minmax">
             <a href="#/" title="Toggle info" class="magnubbin-toggle-preexisting">
               <span class="magnubbin-icon-info"></span>
-              <span class="magnubbin-logo">Magnubbin</span>
             </a>
+            <a href="#/" title="Toggle command" class="magnubbin-toggle-command">
+              <span class="magnubbin-icon-control"></span>
+            </a>
+          </section>
+
+          <section class="magnubbin-control">
+            <!--@todo perhaps reinstate presets in a later version? -->
+            <!--
             <ul class="magnubbin-presets">
               <li data-command="clear">Clear</li>
               <li data-command="add flatr">Add Flatr</li>
@@ -1193,6 +1285,8 @@ Inject HTML elements for the basic Magnubbin framework.
             <ul class="magnubbin-presets magnubbin-focus-presets">
               <li data-command="blur">Focus Camera</li>
             </ul>
+            -->
+            <h2>Type <tt>help</tt> to list commands:</h2>
             <pre id="ookonsole-display"></pre>
             <div><input id="ookonsole-command"></div>
           </section>
@@ -1203,14 +1297,36 @@ Inject HTML elements for the basic Magnubbin framework.
 
       """
 
-The title at the top of the Control toggles display of the preexisting HTML. 
+The ‘info’ icon toggles display of the preexisting HTML. 
 
       $('.magnubbin-toggle-preexisting').addEventListener 'click', ->
         $preexisting = $ '.magnubbin-preexisting'
+        $icon        = $ '.magnubbin-icon-info'
         if /active/.test $preexisting.className
           $preexisting.className = 'magnubbin-preexisting'
+          $icon.className        = 'magnubbin-icon-info'
         else
           $preexisting.className = 'magnubbin-preexisting active'
+          $icon.className        = 'magnubbin-icon-info active'
+          $('.magnubbin-control').className      = 'magnubbin-control'
+          $('.magnubbin-icon-control').className = 'magnubbin-icon-control'
+          grid9OnlyShow()
+
+The ‘command’ icon toggles display of the command-line interface. 
+
+      $('.magnubbin-toggle-command').addEventListener 'click', ->
+        $control     = $ '.magnubbin-control'
+        $icon        = $ '.magnubbin-icon-control'
+        if /active/.test $control.className
+          $control.className     = 'magnubbin-control'
+          $icon.className        = 'magnubbin-icon-control'
+        else
+          $control.className     = 'magnubbin-control active'
+          $icon.className        = 'magnubbin-icon-control active'
+          $('.magnubbin-preexisting').className  = 'magnubbin-preexisting'
+          $('.magnubbin-icon-info').className    = 'magnubbin-icon-info'
+          grid9OnlyShow()
+          $('#ookonsole-command').focus()
 
 
 
@@ -1283,6 +1399,7 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
       main.downPos = [event.clientX, event.clientY]
       main.snapshot = main.oo3d.read(main.focusI or main.cameraI)
       main.delta = null
+      $('.magnubbin-grid9').className = 'magnubbin-grid9 active'
       window.addEventListener 'mousemove', onMousemove
       window.addEventListener 'mouseup'  , onMouseup
 
@@ -1294,6 +1411,7 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
       main.downPos = [touches[0].pageX, touches[0].pageY]
       main.snapshot = main.oo3d.read(main.focusI or main.cameraI)
       main.delta = null
+      $('.magnubbin-grid9').className = 'magnubbin-grid9 active'
       window.addEventListener 'touchmove', onTouchmove
       window.addEventListener 'touchend' , onTouchend
 
@@ -1355,6 +1473,8 @@ If the optional `$el` arguemnt is not set, all `<UL>` elements are hidden.
 
     afterInteraction = ->
       main = window.magnubbin
+
+      $('.magnubbin-grid9').className = 'magnubbin-grid9'
 
 If the user has just completed a UI edit, convert `delta` to an 'edit' command. 
 
