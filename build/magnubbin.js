@@ -215,8 +215,6 @@
           oo3d._all[context.rendererI].meshes.push(oo3d._all[index]);
           context.changeFocus(index);
           oo3d.render();
-          $('.magnubbin-focus-presets').innerHTML += "<li id=\"magnubbin-focus-preset-" + index + "\" \ndata-command=\"focus " + index + "\">" + options[0] + "#" + index + "</li>";
-          context.initPresets();
           return "Added " + options[0] + ". Focused on index " + index;
         }
       });
@@ -228,6 +226,7 @@
           if (context.focusI) {
             context.oo3d["delete"](context.focusI);
             context.oo3d.render();
+            context.focusI = void 0;
             return "Deleted index '" + context.focusI + "'";
           } else {
             return "Cannot delete the camera";
@@ -540,6 +539,9 @@
       ref = this.oo3d._all;
       for (j = 0, len = ref.length; j < len; j++) {
         instance = ref[j];
+        if (!instance) {
+          continue;
+        }
         if ('Item.Mesh' === instance.C) {
           this.oo3d.setRenderMode('TRIANGLES', instance.index);
         }
@@ -558,7 +560,7 @@
     };
 
     Main.prototype.updateMeshInfo = function() {
-      return ª('do updateMeshInfo!');
+      return 1;
     };
 
     return Main;

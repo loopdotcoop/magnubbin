@@ -362,10 +362,10 @@ Add the `add` task.
             oo3d._all[context.rendererI].meshes.push oo3d._all[index]
             context.changeFocus index
             oo3d.render() #@todo remove when animation loop is done
-            $('.magnubbin-focus-presets').innerHTML += """
-              <li id="magnubbin-focus-preset-#{index}" 
-              data-command="focus #{index}">#{options[0]}##{index}</li>"""
-            context.initPresets()
+            #$('.magnubbin-focus-presets').innerHTML += """
+            #  <li id="magnubbin-focus-preset-#{index}" 
+            #  data-command="focus #{index}">#{options[0]}##{index}</li>"""
+            #context.initPresets()
             "Added #{options[0]}. Focused on index #{index}"
 
 
@@ -388,6 +388,7 @@ Add the `delete` task.
             if context.focusI
               context.oo3d.delete context.focusI
               context.oo3d.render()
+              context.focusI = undefined # give the camera focus
               "Deleted index '#{context.focusI}'"
             else
               "Cannot delete the camera"
@@ -790,6 +791,7 @@ Update the `focusI` property.
 Set all Item.Mesh render modes to solid-color. @todo quicker than this?
 
         for instance in @oo3d._all
+          if ! instance then continue #@todo just traverse the renderer’s `meshes`
           if 'Item.Mesh' == instance.C
             @oo3d.setRenderMode 'TRIANGLES', instance.index
 
@@ -813,9 +815,12 @@ Or for the camera, toggle the Grid9 Scene UI.
 
 #### `updateMeshInfo()`
 
-Xx. @todo describe
+@todo describe  
+@todo implement
 
-      updateMeshInfo: -> ª 'do updateMeshInfo!'
+      updateMeshInfo: ->
+        1
+        #ª 'do updateMeshInfo!'
 
 
 
