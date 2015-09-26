@@ -261,39 +261,76 @@ Load position and color Buffers.
              0.000,  0.577, -3.961 # J
           ]})
 
-          @genericColorI = @oo3d.add('Buffer.Color', { data:[
+          @redColorI = @oo3d.add('Buffer.Color', { data:[
             # Front face
-             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
-             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
-             0.3,   0.0,  0.0,  0.95 # near-opaque dark red
+             0.30,   0.02,   0.12,   0.95
+             0.38,   0.04,   0.12,   0.95
+             0.31,   0.01,   0.10,   0.95
             # Right face
-             0.0,  0.25,  0.0,  0.75 # translucent lime
-             0.0,  0.25,  0.0,  0.75 # translucent lime
-             0.0,  0.25,  0.0,  0.75 # translucent lime
+             0.22,   0.02,   0.11,   0.95
+             0.33,   0.01,   0.06,   0.95
+             0.31,   0.00,   0.12,   0.95
             # Back face
-             1.0,  0.25,  0.0,  0.10 # translucent orange
-             1.0,  0.25,  0.0,  0.10 # translucent orange
-             1.0,  0.25,  0.0,  0.10 # translucent orange
+             0.33,   0.00,   0.00,   0.95
+             0.12,   0.08,   0.13,   0.95
+             0.31,   0.01,   0.04,   0.95
             # Left face
-             0.25,  0.5,  1.0,  0.05 # translucent light cyan
-             0.25,  0.5,  1.0,  0.05 # translucent light cyan
-             0.25,  0.5,  1.0,  0.05 # translucent light cyan
+             0.32,   0.00,   0.08,   0.95
+             0.37,   0.01,   0.12,   0.95
+             0.30,   0.05,   0.00,   0.95
           ]})
 
-Create camera, program, renderer and layer. 
+          @greenColorI = @oo3d.add('Buffer.Color', { data:[
+            # Front face
+             0.02,   0.30,   0.12,   0.95
+             0.04,   0.38,   0.12,   0.95
+             0.01,   0.31,   0.10,   0.95
+            # Right face
+             0.02,   0.22,   0.11,   0.95
+             0.01,   0.33,   0.06,   0.95
+             0.00,   0.31,   0.12,   0.95
+            # Back face
+             0.00,   0.33,   0.00,   0.95
+             0.08,   0.12,   0.13,   0.95
+             0.01,   0.31,   0.04,   0.95
+            # Left face
+             0.00,   0.32,   0.08,   0.95
+             0.01,   0.37,   0.12,   0.95
+             0.05,   0.30,   0.00,   0.95
+          ]})
+
+          @blueColorI = @oo3d.add('Buffer.Color', { data:[
+            # Front face
+             0.12,   0.02,   0.30,   0.95
+             0.12,   0.04,   0.38,   0.95
+             0.10,   0.01,   0.31,   0.95
+            # Right face
+             0.11,   0.02,   0.22,   0.95
+             0.06,   0.01,   0.33,   0.95
+             0.12,   0.00,   0.31,   0.95
+            # Back face
+             0.00,   0.00,   0.33,   0.95
+             0.13,   0.08,   0.12,   0.95
+             0.04,   0.01,   0.31,   0.95
+            # Left face
+             0.08,   0.00,   0.32,   0.95
+             0.12,   0.01,   0.37,   0.95
+             0.00,   0.05,   0.30,   0.95
+          ]})
+
+Create camera, programs, renderer and layer. 
 
           @cameraI = @oo3d.add('Item.Camera',
             fovy:   0.785398163 # 45º
             aspect: @$main.width / @$main.height
           )
 
-          @flatItemProgramI = @oo3d.add('Program.FlatItem',
-            subclass: 'Flat'
-          )
+          @flatItemProgramI = @oo3d.add 'Program.FlatItem'
+          @flatProgramI     = @oo3d.add 'Program.Flat'
 
           @rendererI = @oo3d.add('Renderer.Wireframe',
             cameraI:  @cameraI
-            programI: @flatItemProgramI
+            programI: @flatProgramI
             meshIs:   []
           )
 
@@ -350,13 +387,27 @@ Add the `add` task.
     """
           runner: (context, options) ->
             oo3d = context.oo3d
-            valid = ['flatr','betr','ocrex','icos','decr','sqish','slys','spyk']
-            if -1 == valid.indexOf options[0] then return "
+            colorLut =
+              flatr: 'blue'
+              betr : 'green'
+              ocrex: 'red'
+              icos : 'blue'
+              decr : 'blue'
+              sqish: 'red'
+              slys : 'blue'
+              spyk : 'any'
+
+            if ! colorLut[ options[0] ] then return "
               Buffer.Position '#{options[0]}' not recognised"
 
+            if 'any' == colorLut[ options[0] ]
+              color = (['red','green','blue'])[Math.floor(Math.random() * 3)]
+            else
+              color = colorLut[ options[0] ]
+
             index = oo3d.add('Item.Mesh',
-              positionI:  context[options[0] + 'PositionI']
-              colorI:     context.genericColorI
+              positionI:  context[ options[0] + 'PositionI' ]
+              colorI:     context[ color      + 'ColorI'    ]
             )
             oo3d.edit index, { sX:0.25, sY:0.25, sZ:0.25 }
             oo3d._all[context.rendererI].meshes.push oo3d._all[index]
@@ -636,10 +687,35 @@ Add a mousedown event listener on the main canvas.
           x      = Math.round(wRatio * event.clientX)
           y      = Math.round(hRatio * event.clientY)
 
+Get references to the renderer and its current `program` and `uMatCameraLoc`. 
+
+          renderer               = @oo3d._all[@rendererI]
+          displayProgram         = renderer.program
+          displayUMatCameraLoc   = renderer.uMatCameraLoc
+
+Get references to the pick-color `program` and `uMatCameraLoc`. 
+
+          pickerProgram          = @oo3d._all[@flatItemProgramI]
+          pickerUMatCameraLoc    = @oo3d.gl.getUniformLocation pickerProgram.program, 'uMatCamera'
+
+Swap over to the pick-color, and render the scene. 
+
+          renderer.program       = pickerProgram
+          renderer.uMatCameraLoc = pickerUMatCameraLoc
+          @oo3d.render()
+
 Get the index of the Item.Mesh under the mouse (or touch-position). 
 
           color = @oo3d.getColorAt x, @$main.height - y
           meshI = @oo3d.getMeshIByColor color
+
+Swap back to the usual `program` and `uMatCameraLoc`, and render the scene. 
+
+          renderer.program       = displayProgram
+          renderer.uMatCameraLoc = displayUMatCameraLoc
+          @oo3d.render()
+
+@todo Oo3d should have a method to run all this. 
 
 Focus on the Item.Mesh. Or if the background was clicked, focus on the camera. 
 
@@ -788,22 +864,32 @@ Update the `focusI` property.
 
         @focusI = focusI
 
-Set all Item.Mesh render modes to solid-color. @todo quicker than this?
-
-        for instance in @oo3d._all
-          if ! instance then continue #@todo just traverse the renderer’s `meshes`
-          if 'Item.Mesh' == instance.C
-            @oo3d.setRenderMode 'TRIANGLES', instance.index
-
 Set the newly focused Item.Mesh’s render mode to wireframe. 
 
         if ªN == typeof focusI
-          @oo3d.setRenderMode 'LINE_LOOP', focusI
+
+          for instance in @oo3d._all
+            if ! instance then continue #@todo just traverse the renderer’s `meshes`
+            if 'Item.Mesh' == instance.C
+              #@oo3d.setRenderMode 'TRIANGLES', instance.index
+              instance.sBlend = @oo3d.gl.SRC_ALPHA_SATURATE
+              instance.dBlend = @oo3d.gl.ONE_MINUS_DST_COLOR
+
+          #@oo3d.setRenderMode 'LINE_LOOP', focusI
+          @oo3d._all[focusI].sBlend = null
+          @oo3d._all[focusI].dBlend = null
           grid9OnlyShow $ '#grid9-mesh'
 
 Or for the camera, toggle the Grid9 Scene UI.
 
         else
+          for instance in @oo3d._all
+            if ! instance then continue #@todo just traverse the renderer’s `meshes`
+            if 'Item.Mesh' == instance.C
+              #@oo3d.setRenderMode 'TRIANGLES', instance.index
+              instance.sBlend = null
+              instance.dBlend = null
+
           $grid9Mesh = $ '#grid9-scene'
           if 'grid9 active' == $grid9Mesh.getAttribute 'class'
             grid9OnlyShow()
@@ -848,6 +934,9 @@ Xx. @todo describe
         /* LAYOUT */
         html, body {
           overflow: hidden;
+        }
+        body {
+          background-image: url(build/asset/cardboard-tile.png); }
         }
         a img:active {
           outline: none;
