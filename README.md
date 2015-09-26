@@ -1,9 +1,9 @@
 Loop.Coop Present: Magnubbin
 ============================
 
-[![Loop.Coop Logo](build/asset/loopdotcoop-logo-300x100.gif)](http://loop.coop/ "Visit the Loop.Coop homepage")
+[![Loop.Coop Logo](build/asset/loopdotcoop-logo-300x100.png)](http://loop.coop/ "Visit the Loop.Coop homepage")
 
-[![Magnubbin Logo](build/asset/magnubbin-logo-752x80.gif)](http://magnubbin.loop.coop/ "Refresh Magnubbin")
+[![Magnubbin Logo](build/asset/magnubbin-logo-752x80.png)](http://magnubbin.loop.coop/ "Refresh Magnubbin")
 
 #### A super-rapid 3D prototyping system
 

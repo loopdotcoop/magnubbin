@@ -698,10 +698,12 @@ Get references to the pick-color `program` and `uMatCameraLoc`.
           pickerProgram          = @oo3d._all[@flatItemProgramI]
           pickerUMatCameraLoc    = @oo3d.gl.getUniformLocation pickerProgram.program, 'uMatCamera'
 
-Swap over to the pick-color, and render the scene. 
+Swap over to the pick-color, remove unusual blending, and render the scene. 
 
           renderer.program       = pickerProgram
           renderer.uMatCameraLoc = pickerUMatCameraLoc
+          displayFocus           = @focusI
+          @changeFocus null
           @oo3d.render()
 
 Get the index of the Item.Mesh under the mouse (or touch-position). 
@@ -713,6 +715,7 @@ Swap back to the usual `program` and `uMatCameraLoc`, and render the scene.
 
           renderer.program       = displayProgram
           renderer.uMatCameraLoc = displayUMatCameraLoc
+          @changeFocus displayFocus
           @oo3d.render()
 
 @todo Oo3d should have a method to run all this. 
@@ -1084,9 +1087,10 @@ Xx. @todo describe
         .magnubbin-preexisting {
           left:      -101%;
           width:      100%;
-          background: rgba(0,0,0,0.9) url(build/asset/magnubbin-info-bkgnd.png) center center;
+          background: rgba(0,0,0,0.9) url(build/asset/magnubbin-info-bkgnd.jpg) center center;
           background-size: cover;
           text-align: center;
+          color:        #fff;
           opacity:      0;
           transition:   all 0.3s;
         }
@@ -1107,25 +1111,25 @@ Xx. @todo describe
         }
         .magnubbin-preexisting h4 {
           font-size: 1.5em;
-          text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black
         }
         .magnubbin-preexisting h5 strong {
           display: inline-block;
           padding: 0.5em 1em 0.4em 1em;
           font-size: 2em;
-          background-color: rgba(0,0,0,0.7);
+          background-color: rgba(60,0,15,0.9);
           border: 2px solid;
           border-radius: 0.2em;
           cursor: pointer;
           transition: all 0.5s;
         }
         .magnubbin-preexisting h5 strong:hover {
-          color: #0f3;
+          background-color: rgba(120,0,30,0.9);
         }
         .magnubbin-preexisting ol {
           display: inline-block;
           padding: 1rem 1rem 1rem 3rem;
           text-align: left; 
+          line-height: 1.3;
           background-color: rgba(0,0,0,0.7);
           border: 2px solid;
           border-radius: 0.2em;
@@ -1148,19 +1152,23 @@ Xx. @todo describe
             width: 80%;
             height: auto;
           }
+          .magnubbin-preexisting ol {
+            padding: 0.6rem 0.6rem 0.6rem 2rem;
+            font-size: 0.8em;
+          }
         }
         @media only screen and (max-height: 850px) {
           a[title="Visit the Loop.Coop homepage"] {
             margin-top: 5rem;
           }
+          .magnubbin-preexisting ol {
+            padding: 0.6rem 0.6rem 0.6rem 2rem;
+            font-size: 0.8em;
+          }
         }
         @media only screen and (max-height: 800px) {
           a[title="Visit the Loop.Coop homepage"] {
             margin-top: 2rem;
-          }
-          .magnubbin-preexisting ol {
-            padding: 0.6rem 0.6rem 0.6rem 2rem;
-            font-size: 0.8em;
           }
         }
         @media only screen and (max-height: 680px) {
