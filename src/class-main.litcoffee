@@ -501,8 +501,8 @@ Add the `reset` task.
     """
           runner: (context, options) ->
             if context.focusI
-              context.oo3d.edit context.focusI, 'reset'
-              context.oo3d.edit context.focusI, { sX:0.25, sY:0.25, sZ:0.25 }
+              #context.oo3d.edit context.focusI, 'reset'
+              context.oo3d.edit context.focusI, 'r 0 0 0 s 0.25 0.25 0.25 t 0 0 0'
               context.oo3d.render()
               "Reset index '#{context.focusI}'"
             else
